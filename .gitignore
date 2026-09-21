@@ -1,10 +1,13 @@
-.vault_pass
 *.retry
 *.pyc
 __pycache__/
 .venv/
 
-secrets.yml
-backend/server/.env
-docker-compose.yml
-traefik-dynamic/
+projects/*/.vault_pass
+projects/*/secrets.yml
+projects/*/docker-compose.yml
+projects/*/traefik-dynamic/
+projects/*/backend/*/.env
+projects/*/frontend/.env
+projects/*/proxy.conf
+projects/*/.proxy-port-*

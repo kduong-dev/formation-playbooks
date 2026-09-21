@@ -1,0 +1,91 @@
+---
+- name: Generate service env files from encrypted secrets
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - secrets.yml
+    - services.yml
+    - resources.yml
+    - library.yml
+
+  vars:
+    project: trading-core
+    formation_root: "{{ playbook_dir }}/../.."
+    extra_compose_services: [redis, postgres]
+    frontend_env_file: true
+    makefile_targets: []
+
+  tasks:
+    - name: Generate account-service .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/account-service/formation.yml
+      tags:
+        - account-service
+
+    - name: Generate stock-screener .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/stock-screener/formation.yml
+      tags:
+        - stock-screener
+
+    - name: Generate authentication-service .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/authentication-service/formation.yml
+      tags:
+        - authentication-service
+
+    - name: Generate bot-service .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/bot-service/formation.yml
+      tags:
+        - bot-service
+
+    - name: Generate reporting-service .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/reporting-service/formation.yml
+      tags:
+        - reporting-service
+
+    - name: Generate storage-service .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/storage-service/formation.yml
+      tags:
+        - storage-service
+
+    - name: Generate journal-service .env
+      include_tasks: ../../../trading-core/trading-backend/cmd/journal-service/formation.yml
+      tags:
+        - journal-service
+
+    - name: Generate frontend .env
+      include_tasks: ../../../trading-core/trading-frontend/formation.yml
+      tags:
+        - frontend
+
+    - name: Render proxy Makefile
+      template:
+        src: "{{ playbook_dir }}/templates/Makefile.j2"
+        dest: ../../../trading-core/trading-backend/Makefile
+        mode: '0644'
+      tags:
+        - makefile
+
+    - name: Render docker-compose.yml
+      template:
+        src: "{{ formation_root }}/shared/templates/docker-compose.yml.j2"
+        dest: "{{ playbook_dir }}/docker-compose.yml"
+        mode: '0644'
+      tags:
+        - compose
+
+    - name: Ensure traefik-dynamic dir exists
+      file:
+        path: "{{ playbook_dir }}/traefik-dynamic"
+        state: directory
+        mode: '0755'
+      tags:
+        - traefik
+
+    - name: Render Traefik static routes
+      template:
+        src: "{{ formation_root }}/shared/templates/traefik-static.yml.j2"
+        dest: "{{ playbook_dir }}/traefik-dynamic/static.yml"
+        mode: '0644'
+      tags:
+        - traefik

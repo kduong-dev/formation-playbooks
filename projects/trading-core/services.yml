@@ -1,0 +1,93 @@
+---
+# All external access goes through Traefik on :80. Add both to your hosts file
+# pointing to the server IP (/etc/hosts on Linux/Mac, %SystemRoot%\System32\drivers\etc\hosts on Windows):
+#   <server-ip> trading-core.local
+#   <server-ip> api.trading-core.local
+domain: trading-core.local
+api_domain: api.trading-core.local
+
+# Local dev — resolves natively in all browsers, no hosts file needed.
+local_domain: trading-core.localhost
+local_api_domain: api.trading-core.localhost
+
+
+services:
+  # The YAML key (underscored) maps to a docker-compose service name and a
+  # trading-backend/cmd/<dir> by replacing _ with -. The path_prefix must match
+  # the PathPrefix() declared in that service's httpapi/Handler.go.
+  account_service:
+    scheme: http
+    path_prefix: /accounts/v1
+    container: { host: account-service, port: 9000 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      depends_on:
+        - { name: redis, condition: service_healthy }
+
+  stock_screener:
+    scheme: http
+    path_prefix: /stock-screener/v1
+    container: { host: stock-screener, port: 8080 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+
+  authentication_service:
+    scheme: http
+    path_prefix: /auth/v1
+    container: { host: authentication-service, port: 9100 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      depends_on:
+        - { name: postgres, condition: service_healthy }
+
+  bot_service:
+    scheme: http
+    path_prefix: /bots/v1
+    container: { host: bot-service, port: 8081 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      depends_on:
+        - { name: account-service }
+
+  reporting_service:
+    scheme: http
+    path_prefix: /reports/v1
+    container: { host: reporting-service, port: 8082 }
+    compose:
+      memory: { limit: 512m, reservation: 128m }
+      depends_on:
+        - { name: redis, condition: service_healthy }
+        - { name: storage-service, condition: service_started }
+
+  storage_service:
+    scheme: http
+    path_prefix: /storage/v1
+    container: { host: storage-service, port: 8083 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      depends_on:
+        - { name: redis, condition: service_healthy }
+      volumes:
+        - "/opt/trading-storage:/app/storage"
+
+  journal_service:
+    scheme: http
+    path_prefix: /journal/v1
+    container: { host: journal-service, port: 8084 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      depends_on:
+        - { name: redis, condition: service_healthy }
+
+frontend:
+  # Catch-all: everything not matched by a service path_prefix lands on the frontend.
+  compose:
+    container_port: 3000
+    memory: { limit: 512m, reservation: 128m }
+    depends_on:
+      - { name: account-service }
+      - { name: stock-screener }
+      - { name: authentication-service }
+      - { name: bot-service }
+      - { name: reporting-service }
+      - { name: journal-service }
