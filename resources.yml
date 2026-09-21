@@ -1,0 +1,12 @@
+---
+db:
+  sqlite:
+    container: { path: /app/data/remarkable-shelf.db }
+    local:     { path: ./remarkable-shelf.db }
+
+named_volumes:
+  - remarkable-shelf-db
+
+stores:
+  sqlite:
+    DB_PATH: "{{ db.sqlite[mode].path }}"

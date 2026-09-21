@@ -1,0 +1,32 @@
+---
+# All external access goes through Traefik on :80. Add both to your hosts file
+# pointing at the server IP once a server exists:
+#   <server-ip> remarkable-shelf.local
+#   <server-ip> api.remarkable-shelf.local
+domain: remarkable-shelf.local
+api_domain: api.remarkable-shelf.local
+
+# Local dev — resolves natively in all browsers, no hosts file needed.
+local_domain: remarkable-shelf.localhost
+local_api_domain: api.remarkable-shelf.localhost
+
+services:
+  # The YAML key (underscored) maps to a docker-compose service name and a
+  # ../reMarkableShelf/backend/cmd/<dir> by replacing _ with -. The path_prefix
+  # must match the API's mux route prefix.
+  server:
+    scheme: http
+    path_prefix: /api
+    container: { host: server, port: 8080 }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      volumes:
+        - "remarkable-shelf-db:/app/data"
+
+frontend:
+  # Catch-all: everything not matched by a service path_prefix lands on the frontend.
+  compose:
+    container_port: 80
+    memory: { limit: 128m, reservation: 32m }
+    depends_on:
+      - { name: server }

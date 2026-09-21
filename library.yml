@@ -1,0 +1,12 @@
+---
+secrets:
+  google_books:
+    GOOGLE_BOOKS_API_KEY: "{{ google_books_api_key }}"
+  remarkable_ssh:
+    SSH_USER: "{{ remarkable_ssh_user | default('root') }}"
+    SSH_PASSWORD: "{{ remarkable_ssh_password }}"
+    SSH_PORT: "{{ remarkable_ssh_port | default('22') }}"
+
+config:
+  server:
+    PORT: "{{ services.server.container.port }}"

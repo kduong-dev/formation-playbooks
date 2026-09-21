@@ -3,3 +3,8 @@
 *.pyc
 __pycache__/
 .venv/
+
+secrets.yml
+backend/server/.env
+docker-compose.yml
+traefik-dynamic/

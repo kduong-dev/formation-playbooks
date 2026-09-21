@@ -1,0 +1,41 @@
+---
+- name: Generate service env files from encrypted secrets
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - secrets.yml
+    - services.yml
+    - resources.yml
+    - library.yml
+
+  tasks:
+    - name: Generate server .env
+      include_tasks: ../reMarkableShelf/backend/cmd/server/formation.yml
+      tags:
+        - server
+
+    - name: Render docker-compose.yml
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: docker-compose.yml
+        mode: '0644'
+      tags:
+        - compose
+
+    - name: Ensure traefik-dynamic dir exists
+      file:
+        path: traefik-dynamic
+        state: directory
+        mode: '0755'
+      tags:
+        - traefik
+
+    - name: Render Traefik static routes
+      template:
+        src: templates/traefik-static.yml.j2
+        dest: traefik-dynamic/static.yml
+        mode: '0644'
+      tags:
+        - traefik
