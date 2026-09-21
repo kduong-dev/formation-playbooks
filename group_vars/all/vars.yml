@@ -1,0 +1,4 @@
+---
+backend_service_name: remarkable-shelf-backend
+backend_deploy_path: /opt/remarkable-shelf
+backend_service_port: 8080

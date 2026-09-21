@@ -1,0 +1,37 @@
+---
+- name: Ensure deploy directory exists
+  ansible.builtin.file:
+    path: "{{ backend_deploy_path }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Copy backend binary
+  ansible.builtin.copy:
+    src: "{{ backend_binary_src }}"
+    dest: "{{ backend_deploy_path }}/server"
+    mode: "0755"
+  notify: Restart backend service
+
+- name: Render environment file with secrets
+  ansible.builtin.template:
+    src: backend.env.j2
+    dest: "{{ backend_deploy_path }}/.env"
+    owner: "{{ ansible_user }}"
+    mode: "0600"
+  notify: Restart backend service
+
+- name: Render systemd unit
+  ansible.builtin.template:
+    src: backend.service.j2
+    dest: /etc/systemd/system/{{ backend_service_name }}.service
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart backend service
+
+- name: Ensure backend service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ backend_service_name }}"
+    enabled: true
+    state: started

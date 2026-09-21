@@ -1,0 +1,14 @@
+[Unit]
+Description={{ backend_service_name }}
+After=network.target
+
+[Service]
+Type=simple
+User={{ ansible_user }}
+WorkingDirectory={{ backend_deploy_path }}
+EnvironmentFile={{ backend_deploy_path }}/.env
+ExecStart={{ backend_deploy_path }}/server
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
