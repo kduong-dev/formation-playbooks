@@ -39,4 +39,4 @@
 
 - name: "[{{ service_name }}] Collect Makefile target"
   set_fact:
-    makefile_targets: "{{ makefile_targets | default([]) + [{'name': service_name, 'cmd_dir': cmd_dir, 'env': service_environment}] }}"
+    makefile_targets: "{{ makefile_targets | default([]) + [{'name': service_name, 'repo_dir': repo_dir | default(''), 'cmd_dir': cmd_dir, 'env': service_environment}] }}"

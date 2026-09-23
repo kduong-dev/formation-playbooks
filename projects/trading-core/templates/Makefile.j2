@@ -27,6 +27,6 @@ run-{{ target.name }}:
 	echo $$PORT > "$(PROXY_DIR)/.proxy-port-{{ target.name }}"; \
 	echo "[proxy] {{ target.name }} on host port $$PORT"; \
 	trap 'rm -f "$(PROXY_DIR)/.proxy-port-{{ target.name }}"' EXIT; \
-	{% for key, value in target.env | dictsort %}{{ key }}='{{ value | string | replace("'", "'\\''") }}' {% endfor %}PORT=$$PORT go run ./{{ target.cmd_dir }}
+	{% for key, value in target.env | dictsort %}{{ key }}='{{ value | string | replace("'", "'\\''") }}' {% endfor %}PORT=$$PORT go {% if target.repo_dir %}-C {{ target.repo_dir }} {% endif %}run ./{{ target.cmd_dir }}
 
 {% endfor %}

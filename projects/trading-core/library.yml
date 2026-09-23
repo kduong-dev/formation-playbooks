@@ -7,6 +7,17 @@ secrets:
   alpaca:
     ALPACA_API_KEY: "{{ alpaca_api_key }}"
     ALPACA_API_SECRET: "{{ alpaca_api_secret }}"
+  # storage-service side: namespace -> sha256(api key); see storage-service's cmd/api-key-generator.
+  storage_clients:
+    STORAGE_CLIENTS_B64_JSON: "{{ storage_clients_b64_json }}"
+  # Caller side: the raw key for the trading-core namespace.
+  storage_service_api_key:
+    STORAGE_SERVICE_API_KEY: "{{ storage_service_api_key }}"
+
+config:
+  storage_service:
+    # Uploads recorded before storage-service had namespaces belong to trading-core.
+    STORAGE_LEGACY_NAMESPACE: trading-core
 
 apis:
   alpaca:
@@ -33,9 +44,7 @@ clients:
     ACCOUNT_SERVICE_PORT: "{{ services.account_service.container.port if mode == 'container' else 80 }}"
   storage_service:
     STORAGE_SERVICE_CLIENT_IMPLEMENTATION: HTTP
-    STORAGE_SERVICE_SCHEME: "{{ services.storage_service.scheme }}"
-    STORAGE_SERVICE_HOST: "{{ services.storage_service.container.host if mode == 'container' else domain }}"
-    STORAGE_SERVICE_PORT: "{{ services.storage_service.container.port if mode == 'container' else 80 }}"
+    STORAGE_SERVICE_URL: "{{ services.storage_service.scheme }}://{{ (services.storage_service.container.host ~ ':' ~ services.storage_service.container.port) if mode == 'container' else (local_api_domain if (local_mode | default('')) == 'localhost' else api_domain) }}"
 
 # Browser-side URLs always go through Traefik on the single host.
 public_clients:

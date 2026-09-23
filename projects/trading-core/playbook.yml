@@ -44,7 +44,10 @@
         - reporting-service
 
     - name: Generate storage-service .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/storage-service/formation.yml
+      include_tasks: ../../../storage-service/cmd/server/formation.yml
+      vars:
+        # Relative to trading-backend, where the proxy-mode Makefile is rendered.
+        repo_dir: ../../storage-service
       tags:
         - storage-service
 

@@ -59,10 +59,14 @@ services:
         - { name: redis, condition: service_healthy }
         - { name: storage-service, condition: service_started }
 
+  # Lives in its own repo (storage-service) rather than trading-backend/cmd.
+  # Requests are authenticated per calling project by API key, so the Traefik
+  # route below exposes nothing without one; it exists for proxy-mode dev.
   storage_service:
     scheme: http
     path_prefix: /storage/v1
     container: { host: storage-service, port: 8083 }
+    build: { context: ../../../storage-service, dockerfile: Dockerfile }
     compose:
       memory: { limit: 256m, reservation: 64m }
       depends_on:
