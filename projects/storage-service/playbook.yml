@@ -21,13 +21,13 @@
   tasks:
     # `apply` carries each tag into the included tasks, so e.g. `--tags <service>`
     # renders just that service; a tag on include_tasks alone doesn't reach them.
-    - name: Generate storage-service .env
+    - name: Generate api .env
       include_tasks:
         file: ../../../storage-service/cmd/server/formation.yml
         apply:
-          tags: [storage-service]
+          tags: [api]
       tags:
-        - storage-service
+        - api
 
     - name: Render docker-compose.yml and Traefik routes
       import_tasks: "{{ formation_root }}/shared/tasks/render-compose.yml"

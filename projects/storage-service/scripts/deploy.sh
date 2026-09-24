@@ -48,10 +48,10 @@ rsync -az --delete --exclude .git --exclude tmp \
     "$APPS_DIR/storage-service/" "$SERVER:$REMOTE_ROOT/storage-service/"
 
 echo "Syncing rendered files..."
-ssh "$SERVER" "mkdir -p '$REMOTE_PROJECT/backend/storage-service'"
+ssh "$SERVER" "mkdir -p '$REMOTE_PROJECT/backend/api'"
 scp -q "$PROJECT_DIR/docker-compose.yml" "$SERVER:$REMOTE_PROJECT/docker-compose.yml"
-scp -q "$PROJECT_DIR/backend/storage-service/.env" "$SERVER:$REMOTE_PROJECT/backend/storage-service/.env"
-ssh "$SERVER" "chmod 600 '$REMOTE_PROJECT/backend/storage-service/.env' && mkdir -p '$REMOTE_GATEWAY/routes'"
+scp -q "$PROJECT_DIR/backend/api/.env" "$SERVER:$REMOTE_PROJECT/backend/api/.env"
+ssh "$SERVER" "chmod 600 '$REMOTE_PROJECT/backend/api/.env' && mkdir -p '$REMOTE_GATEWAY/routes'"
 scp -q "$FORMATION_DIR/projects/gateway/routes/storage-service.yml" "$SERVER:$REMOTE_GATEWAY/routes/storage-service.yml"
 
 echo "Building and starting on $SERVER..."
@@ -67,6 +67,6 @@ if [[ "$direct" == "401" && "$routed" == "401" ]]; then
     echo "storage-service is up, directly and via api.storage-service.home (401 without an API key, as expected)."
 else
     echo "Unexpected responses — direct: '$direct', via gateway: '$routed'. Logs:" >&2
-    ssh "$SERVER" "cd '$REMOTE_PROJECT' && docker compose logs --tail 30 storage-service; cd '$REMOTE_GATEWAY' && docker compose logs --tail 30 traefik" >&2
+    ssh "$SERVER" "cd '$REMOTE_PROJECT' && docker compose logs --tail 30 api; cd '$REMOTE_GATEWAY' && docker compose logs --tail 30 traefik" >&2
     exit 1
 fi

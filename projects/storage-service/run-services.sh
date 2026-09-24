@@ -38,11 +38,11 @@ case "${1:-}" in
     start)
         ansible-playbook playbook.yml
         ensure_networks
-        "${COMPOSE_CMD[@]}" up -d --build
+        "${COMPOSE_CMD[@]}" up -d --build --remove-orphans
         ;;
     up)
         ensure_networks
-        "${COMPOSE_CMD[@]}" up -d
+        "${COMPOSE_CMD[@]}" up -d --remove-orphans
         ;;
     kill)
         "${COMPOSE_CMD[@]}" down --remove-orphans

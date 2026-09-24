@@ -5,15 +5,18 @@
   Routable containers (services + frontend) join the shared `gateway` network,
   where projects/gateway's Traefik reaches them as <project>-<name>; the alias
   keeps same-named containers from different projects (e.g. two `frontend`s)
-  apart. Everything else stays on the project's own default network.
+  apart. On any other shared network a service is aliased as its
+  container.host, the name its callers use. Everything else stays on the
+  project's own default network.
 #}
-{% macro networks(name, extra=[]) %}
+{% macro networks(name, extra=[], host=none) %}
     networks:
       default: {}
       gateway:
         aliases: [{{ project }}-{{ name }}]
 {% for net in extra %}
-      {{ net }}: {}
+      {{ net }}:
+        aliases: [{{ host }}]
 {% endfor %}
 {% endmacro %}
 services:
@@ -100,7 +103,7 @@ services:
       - '{{ port }}'
 {% endfor %}
 {% endif %}
-{{ networks(name, cfg.compose.networks | default([])) -}}
+{{ networks(name, cfg.compose.networks | default([]), cfg.container.host) -}}
 {% if cfg.compose.depends_on is defined %}
     depends_on:
 {% for dep in cfg.compose.depends_on %}
