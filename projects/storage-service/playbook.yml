@@ -16,9 +16,6 @@
     # Go module, relative to formation-playbooks' parent (the build context).
     backend_dir: storage-service
     extra_compose_services: [redis]
-    # Not browser-facing: callers reach it over the shared network, so there's
-    # no frontend and no Traefik in this stack.
-    traefik: false
     external_networks: [storage]
 
   tasks:

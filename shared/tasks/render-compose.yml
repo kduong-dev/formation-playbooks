@@ -1,6 +1,7 @@
 ---
-# docker-compose.yml plus, unless the playbook sets `traefik: false`, the
-# Traefik route table, both into the project's own directory.
+# docker-compose.yml into the project's own directory, and the project's
+# routes into the shared Traefik's directory (projects/gateway/routes), which
+# it watches, so re-rendering updates routing without restarting anything.
 - name: Render docker-compose.yml
   template:
     src: "{{ formation_root }}/shared/templates/docker-compose.yml.j2"
@@ -9,20 +10,18 @@
   tags:
     - compose
 
-- name: Ensure traefik-dynamic dir exists
+- name: Ensure gateway routes dir exists
   file:
-    path: "{{ playbook_dir }}/traefik-dynamic"
+    path: "{{ formation_root }}/projects/gateway/routes"
     state: directory
     mode: '0755'
-  when: traefik | default(true)
   tags:
     - traefik
 
-- name: Render Traefik static routes
+- name: Render Traefik routes
   template:
     src: "{{ formation_root }}/shared/templates/traefik-static.yml.j2"
-    dest: "{{ playbook_dir }}/traefik-dynamic/static.yml"
+    dest: "{{ formation_root }}/projects/gateway/routes/{{ project }}.yml"
     mode: '0644'
-  when: traefik | default(true)
   tags:
     - traefik

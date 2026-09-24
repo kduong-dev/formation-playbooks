@@ -1,6 +1,6 @@
 #!/bin/bash
-# Manage docker-compose for formation-playbooks. All external traffic goes
-# through Traefik on :80 at <subdomain>.<domain>.
+# Manage docker-compose for remarkable-shelf. All external traffic goes
+# through the shared Traefik (projects/gateway) on :80 at <subdomain>.<domain>.
 
 set -euo pipefail
 
@@ -9,12 +9,17 @@ cd "$SCRIPT_DIR"
 
 COMPOSE_CMD=(docker compose -f "$SCRIPT_DIR/docker-compose.yml" --project-directory "$SCRIPT_DIR")
 
+# Created by whichever stack starts first; projects/gateway's Traefik routes over it.
+ensure_networks() {
+    docker network inspect gateway >/dev/null 2>&1 || docker network create gateway >/dev/null
+}
+
 usage() {
     cat <<EOF
 Usage: $0 <command>
 
   render   Run the Ansible playbook to regenerate .env files, docker-compose.yml,
-           and Traefik routes from secrets.yml / services.yml / resources.yml / library.yml
+           and Traefik routes (into projects/gateway/routes) from secrets.yml / services.yml / resources.yml / library.yml
   start    render, then build + up -d
   up       up -d (no rebuild)
   kill     down --remove-orphans
@@ -28,9 +33,11 @@ case "${1:-}" in
         ;;
     start)
         ansible-playbook playbook.yml
+        ensure_networks
         "${COMPOSE_CMD[@]}" up -d --build
         ;;
     up)
+        ensure_networks
         "${COMPOSE_CMD[@]}" up -d
         ;;
     kill)

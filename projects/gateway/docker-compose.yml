@@ -1,0 +1,26 @@
+# The server's single entry point on :80. Each project's playbook renders its
+# routes into routes/<project>.yml; Traefik watches the directory, so a
+# project's routes go live when it renders. Backends are reached over the
+# shared `gateway` network by their <project>-<service> alias.
+services:
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - ./routes:/etc/traefik/dynamic:ro
+    extra_hosts:
+      # Proxy-mode routes (trading-core) point at services run on the host.
+      - "host.docker.internal:host-gateway"
+    networks:
+      - gateway
+    mem_limit: 128m
+    restart: unless-stopped
+
+networks:
+  gateway:
+    external: true

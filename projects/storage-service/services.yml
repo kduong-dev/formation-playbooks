@@ -1,8 +1,14 @@
 ---
+# Routed by the shared Traefik (projects/gateway) on :80. api.storage-service.local
+# resolves via the server's dnsmasq; the .localhost name resolves natively.
+api_domain: api.storage-service.local
+local_api_domain: api.storage-service.localhost
+
 services:
   # The YAML key (underscored) maps to the docker-compose service name by
-  # replacing _ with -; `cmd` names its ../storage-service/cmd/<dir>. Other projects reach it as storage-service:8083 on the
-  # shared `storage` network; each authenticates with its own API key, which
+  # replacing _ with -; `cmd` names its ../storage-service/cmd/<dir>. Other
+  # projects' containers reach it as storage-service:8083 on the shared
+  # `storage` network, anything else through the gateway; each authenticates with its own API key, which
   # maps to a namespace (see storage-service's cmd/api-key-generator).
   storage_service:
     scheme: http

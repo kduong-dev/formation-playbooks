@@ -2,9 +2,12 @@
 
 Deploys [storage-service](../../../storage-service/README.md), the
 project-agnostic blob store, with its own redis for the event logs. It has no
-frontend and no Traefik: calling projects reach it as `storage-service:8083`
-over the shared external docker network `storage`. For callers running on the
-host (e.g. trading-core's proxy mode), it is also published on
+frontend. Calling projects' containers reach it as `storage-service:8083` over
+the shared external docker network `storage`; anything else (your machine,
+other LAN devices) goes through the shared Traefik at
+`http://api.storage-service.local/storage/v1`, or
+`api.storage-service.localhost` in local dev. For callers running on the
+server's host (e.g. trading-core's proxy mode), it is also published on
 `127.0.0.1:8083`.
 
 See the [repo root README](../../README.md) for how the shared rendering

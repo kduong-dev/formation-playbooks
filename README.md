@@ -1,7 +1,8 @@
 # formation-playbooks
 
 Centralized Ansible + Docker Compose + Traefik formation for multiple
-projects. Each project keeps its own secrets, services, and trust boundary;
+projects, all served on one machine through a single shared Traefik
+([projects/gateway](projects/gateway/README.md)). Each project keeps its own secrets, services, and trust boundary;
 they share the rendering logic (Ansible tasks, Jinja templates) under `shared/`.
 
 ## Layout
@@ -14,14 +15,14 @@ formation-playbooks/
       render-env.yml        single-mode .env (used by browser-facing frontends)
       merge-env.yml         resources -> service_environment, used by both of the above
       write-env.yml         writes service_environment to env_dest
-      render-compose.yml    docker-compose.yml + Traefik routes (skipped with `traefik: false`)
+      render-compose.yml    docker-compose.yml + the project's routes into projects/gateway/routes/
     docker/
       backend.Dockerfile    builds any project's Go service (APP_DIR + SERVICE build args;
                             a service's `cmd:` in services.yml overrides SERVICE)
     templates/
       service.env.j2        KEY=VALUE per line
       docker-compose.yml.j2 compose definition, parameterized by project + services.yml + resources.yml
-      traefik-static.yml.j2 Traefik routing for server and local domains
+      traefik-static.yml.j2 a project's routes for the shared Traefik, server and local domains
   projects/
     <name>/                 one self-contained formation per project (see Projects below)
 ```
@@ -78,14 +79,16 @@ so that include path keeps working without editing the app repos.
 ## Adding a new project
 
 1. `mkdir projects/<name>`
-2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`
+2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`, and `api_domain` / `local_api_domain` (plus `domain` / `local_domain` with a frontend) in `services.yml`
 3. Add a `tasks/render-service.yml` shim forwarding to `shared/tasks/render-service.yml`
 4. Add `cmd/<service>/formation.yml` in the app repo declaring its resources
-5. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create the network in `run-services.sh` before `up` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
+5. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create it in `run-services.sh` before `up` alongside `gateway` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
 6. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
+7. For the LAN: add the `.local` domain to the server's dnsmasq (see [projects/gateway](projects/gateway/README.md#domains))
 
 ## Projects
 
 - [remarkable-shelf](projects/remarkable-shelf/README.md) — single backend service + static frontend, sqlite
 - [trading-core](projects/trading-core/README.md) — multi-service backend + frontend, redis + postgres, proxy mode for host-side debugging
-- [storage-service](projects/storage-service/README.md) — shared blob storage + its own redis, no frontend or Traefik; other projects reach it over the shared `storage` docker network
+- [storage-service](projects/storage-service/README.md) — shared blob storage + its own redis, no frontend; other projects' containers reach it over the shared `storage` docker network, everything else at `api.storage-service.local`
+- [gateway](projects/gateway/README.md) — the shared Traefik on :80 that routes every project's domains

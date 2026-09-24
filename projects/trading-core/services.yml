@@ -1,5 +1,5 @@
 ---
-# All external access goes through Traefik on :80. Add both to your hosts file
+# All external access goes through the shared Traefik (projects/gateway) on :80. Add both to your hosts file
 # pointing to the server IP (/etc/hosts on Linux/Mac, %SystemRoot%\System32\drivers\etc\hosts on Windows):
 #   <server-ip> trading-core.local
 #   <server-ip> api.trading-core.local

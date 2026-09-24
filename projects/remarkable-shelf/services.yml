@@ -1,5 +1,5 @@
 ---
-# All external access goes through Traefik on :80. Add both to your hosts file
+# All external access goes through the shared Traefik (projects/gateway) on :80. Add both to your hosts file
 # pointing at the server IP once a server exists:
 #   <server-ip> remarkable-shelf.local
 #   <server-ip> api.remarkable-shelf.local

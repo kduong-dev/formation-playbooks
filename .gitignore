@@ -6,7 +6,8 @@ __pycache__/
 projects/*/.vault_pass
 projects/*/secrets.yml
 projects/*/docker-compose.yml
-projects/*/traefik-dynamic/
+!projects/gateway/docker-compose.yml
+projects/gateway/routes/
 projects/*/backend/*/.env
 projects/*/frontend/.env
 projects/*/proxy.conf
