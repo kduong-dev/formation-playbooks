@@ -13,51 +13,69 @@
   vars:
     project: trading-core
     formation_root: "{{ playbook_dir }}/../.."
+    # Backend Go module, relative to formation-playbooks' parent (the build context).
+    backend_dir: trading-core/trading-backend
     extra_compose_services: [redis, postgres]
+    external_networks: [storage]
     frontend_env_file: true
     makefile_targets: []
 
   tasks:
+    # `apply` carries each tag into the included tasks, so e.g. `--tags <service>`
+    # renders just that service; a tag on include_tasks alone doesn't reach them.
     - name: Generate account-service .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/account-service/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-backend/cmd/account-service/formation.yml
+        apply:
+          tags: [account-service]
       tags:
         - account-service
 
     - name: Generate stock-screener .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/stock-screener/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-backend/cmd/stock-screener/formation.yml
+        apply:
+          tags: [stock-screener]
       tags:
         - stock-screener
 
     - name: Generate authentication-service .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/authentication-service/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-backend/cmd/authentication-service/formation.yml
+        apply:
+          tags: [authentication-service]
       tags:
         - authentication-service
 
     - name: Generate bot-service .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/bot-service/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-backend/cmd/bot-service/formation.yml
+        apply:
+          tags: [bot-service]
       tags:
         - bot-service
 
     - name: Generate reporting-service .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/reporting-service/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-backend/cmd/reporting-service/formation.yml
+        apply:
+          tags: [reporting-service]
       tags:
         - reporting-service
 
-    - name: Generate storage-service .env
-      include_tasks: ../../../storage-service/cmd/server/formation.yml
-      vars:
-        # Relative to trading-backend, where the proxy-mode Makefile is rendered.
-        repo_dir: ../../storage-service
-      tags:
-        - storage-service
-
     - name: Generate journal-service .env
-      include_tasks: ../../../trading-core/trading-backend/cmd/journal-service/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-backend/cmd/journal-service/formation.yml
+        apply:
+          tags: [journal-service]
       tags:
         - journal-service
 
     - name: Generate frontend .env
-      include_tasks: ../../../trading-core/trading-frontend/formation.yml
+      include_tasks:
+        file: ../../../trading-core/trading-frontend/formation.yml
+        apply:
+          tags: [frontend]
       tags:
         - frontend
 
@@ -69,26 +87,5 @@
       tags:
         - makefile
 
-    - name: Render docker-compose.yml
-      template:
-        src: "{{ formation_root }}/shared/templates/docker-compose.yml.j2"
-        dest: "{{ playbook_dir }}/docker-compose.yml"
-        mode: '0644'
-      tags:
-        - compose
-
-    - name: Ensure traefik-dynamic dir exists
-      file:
-        path: "{{ playbook_dir }}/traefik-dynamic"
-        state: directory
-        mode: '0755'
-      tags:
-        - traefik
-
-    - name: Render Traefik static routes
-      template:
-        src: "{{ formation_root }}/shared/templates/traefik-static.yml.j2"
-        dest: "{{ playbook_dir }}/traefik-dynamic/static.yml"
-        mode: '0644'
-      tags:
-        - traefik
+    - name: Render docker-compose.yml and Traefik routes
+      import_tasks: "{{ formation_root }}/shared/tasks/render-compose.yml"

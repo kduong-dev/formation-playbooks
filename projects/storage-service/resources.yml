@@ -1,0 +1,28 @@
+---
+redis:
+  container: { address: redis:6379 }
+  local:     { address: localhost:6380 }
+  compose:
+    image: redis:7-alpine
+    # 6380 so it doesn't collide with another project's redis on the host.
+    ports: ["127.0.0.1:6380:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes: ["redis-data:/data"]
+    memory: { limit: 256m, reservation: 64m }
+
+named_volumes:
+  - redis-data
+
+logs:
+  storage_event_log:
+    STORAGE_EVENT_LOG_FACTORY: REDIS
+    STORAGE_EVENT_LOG_REDIS_ADDRESS: "{{ redis[mode].address }}"
+
+storage:
+  filesystem:
+    STORAGE: FILESYSTEM
+    STORAGE_FILESYSTEM_DIRECTORY: "{{ '/app/storage' if mode == 'container' else './tmp/storage' }}"

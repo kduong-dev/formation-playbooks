@@ -10,6 +10,11 @@ api_domain: api.trading-core.local
 local_domain: trading-core.localhost
 local_api_domain: api.trading-core.localhost
 
+# What rendered URLs use: the .localhost pair by default, the .local pair with
+# `run-services.sh render --local`.
+effective_domain: "{{ local_domain if (local_mode | default('')) == 'localhost' else domain }}"
+effective_api_domain: "{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+
 
 services:
   # The YAML key (underscored) maps to a docker-compose service name and a
@@ -57,22 +62,8 @@ services:
       memory: { limit: 512m, reservation: 128m }
       depends_on:
         - { name: redis, condition: service_healthy }
-        - { name: storage-service, condition: service_started }
-
-  # Lives in its own repo (storage-service) rather than trading-backend/cmd.
-  # Requests are authenticated per calling project by API key, so the Traefik
-  # route below exposes nothing without one; it exists for proxy-mode dev.
-  storage_service:
-    scheme: http
-    path_prefix: /storage/v1
-    container: { host: storage-service, port: 8083 }
-    build: { context: ../../../storage-service, dockerfile: Dockerfile }
-    compose:
-      memory: { limit: 256m, reservation: 64m }
-      depends_on:
-        - { name: redis, condition: service_healthy }
-      volumes:
-        - "/opt/trading-storage:/app/storage"
+      # Calls storage-service, which runs as its own formation (projects/storage-service).
+      networks: [storage]
 
   journal_service:
     scheme: http

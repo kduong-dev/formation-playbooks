@@ -1,0 +1,12 @@
+---
+- name: "[{{ service_name | default(env_dest) }}] Ensure .env directory exists"
+  file:
+    path: "{{ env_dest | dirname }}"
+    state: directory
+    mode: '0755'
+
+- name: "[{{ service_name | default(env_dest) }}] Render .env"
+  template:
+    src: "{{ formation_root }}/shared/templates/service.env.j2"
+    dest: "{{ env_dest }}"
+    mode: '0600'

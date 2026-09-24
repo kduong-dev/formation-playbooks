@@ -7,17 +7,10 @@ secrets:
   alpaca:
     ALPACA_API_KEY: "{{ alpaca_api_key }}"
     ALPACA_API_SECRET: "{{ alpaca_api_secret }}"
-  # storage-service side: namespace -> sha256(api key); see storage-service's cmd/api-key-generator.
-  storage_clients:
-    STORAGE_CLIENTS_B64_JSON: "{{ storage_clients_b64_json }}"
-  # Caller side: the raw key for the trading-core namespace.
+  # The raw storage-service key for the trading-core namespace; its hash is
+  # registered in projects/storage-service's storage_clients_b64_json.
   storage_service_api_key:
     STORAGE_SERVICE_API_KEY: "{{ storage_service_api_key }}"
-
-config:
-  storage_service:
-    # Uploads recorded before storage-service had namespaces belong to trading-core.
-    STORAGE_LEGACY_NAMESPACE: trading-core
 
 apis:
   alpaca:
@@ -29,34 +22,34 @@ apis:
     FETCH_SENTIMENT_STRATEGY_CNN_MARKET_ENDPOINT: https://production.dataviz.cnn.io/index/fearandgreed/graphdata
   trading_api:
     TRADING_API_SCHEME: http
-    TRADING_API_HOST: "{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    TRADING_API_HOST: "{{ effective_api_domain }}"
   frontend:
-    FRONTEND_BASE_URL: "http://{{ local_domain if (local_mode | default('')) == 'localhost' else domain }}"
+    FRONTEND_BASE_URL: "http://{{ effective_domain }}"
 
 # In container mode siblings reach each other via the docker network
 # (<container.host>:<container.port>) — direct, no proxy hop. In local/host mode
-# they go through Traefik on :80 at http://<domain><path_prefix>.
+# they go through Traefik on :80 at http://<effective_api_domain><path_prefix>.
 clients:
   account_service:
     ACCOUNT_SERVICE_CLIENT_IMPLEMENTATION: HTTP
     ACCOUNT_SERVICE_SCHEME: "{{ services.account_service.scheme }}"
-    ACCOUNT_SERVICE_HOST: "{{ services.account_service.container.host if mode == 'container' else domain }}"
+    ACCOUNT_SERVICE_HOST: "{{ services.account_service.container.host if mode == 'container' else effective_api_domain }}"
     ACCOUNT_SERVICE_PORT: "{{ services.account_service.container.port if mode == 'container' else 80 }}"
   storage_service:
     STORAGE_SERVICE_CLIENT_IMPLEMENTATION: HTTP
-    STORAGE_SERVICE_URL: "{{ services.storage_service.scheme }}://{{ (services.storage_service.container.host ~ ':' ~ services.storage_service.container.port) if mode == 'container' else (local_api_domain if (local_mode | default('')) == 'localhost' else api_domain) }}"
+    STORAGE_SERVICE_URL: "{{ storage_service[mode].url }}"
 
 # Browser-side URLs always go through Traefik on the single host.
 public_clients:
   account_service:
-    NEXT_PUBLIC_ACCOUNT_SERVICE_BASE_URL: "{{ services.account_service.scheme }}://{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    NEXT_PUBLIC_ACCOUNT_SERVICE_BASE_URL: "{{ services.account_service.scheme }}://{{ effective_api_domain }}"
   stock_screener:
-    NEXT_PUBLIC_STOCK_SCREENER_BASE_URL: "{{ services.stock_screener.scheme }}://{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    NEXT_PUBLIC_STOCK_SCREENER_BASE_URL: "{{ services.stock_screener.scheme }}://{{ effective_api_domain }}"
   authentication_service:
-    NEXT_PUBLIC_AUTH_SERVICE_BASE_URL: "{{ services.authentication_service.scheme }}://{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    NEXT_PUBLIC_AUTH_SERVICE_BASE_URL: "{{ services.authentication_service.scheme }}://{{ effective_api_domain }}"
   bot_service:
-    NEXT_PUBLIC_BOT_SERVICE_BASE_URL: "{{ services.bot_service.scheme }}://{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    NEXT_PUBLIC_BOT_SERVICE_BASE_URL: "{{ services.bot_service.scheme }}://{{ effective_api_domain }}"
   journal_service:
-    NEXT_PUBLIC_JOURNAL_SERVICE_BASE_URL: "{{ services.journal_service.scheme }}://{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    NEXT_PUBLIC_JOURNAL_SERVICE_BASE_URL: "{{ services.journal_service.scheme }}://{{ effective_api_domain }}"
   reporting_service:
-    NEXT_PUBLIC_REPORTING_SERVICE_BASE_URL: "{{ services.reporting_service.scheme }}://{{ local_api_domain if (local_mode | default('')) == 'localhost' else api_domain }}"
+    NEXT_PUBLIC_REPORTING_SERVICE_BASE_URL: "{{ services.reporting_service.scheme }}://{{ effective_api_domain }}"

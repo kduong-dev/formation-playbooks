@@ -47,7 +47,6 @@ main() {
         "backend/journal-service/.env"
         "backend/reporting-service/.env"
         "backend/stock-screener/.env"
-        "backend/storage-service/.env"
         "frontend/.env"
         "traefik-dynamic/static.yml"
     )

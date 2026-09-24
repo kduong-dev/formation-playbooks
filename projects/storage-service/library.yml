@@ -1,0 +1,6 @@
+---
+secrets:
+  # namespace -> sha256(api key), one entry per calling project; see
+  # storage-service's cmd/api-key-generator.
+  storage_clients:
+    STORAGE_CLIENTS_B64_JSON: "{{ storage_clients_b64_json }}"

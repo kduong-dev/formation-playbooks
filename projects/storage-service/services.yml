@@ -1,0 +1,20 @@
+---
+services:
+  # The YAML key (underscored) maps to the docker-compose service name by
+  # replacing _ with -. Other projects reach it as storage-service:8083 on the
+  # shared `storage` network; each authenticates with its own API key, which
+  # maps to a namespace (see storage-service's cmd/api-key-generator).
+  storage_service:
+    scheme: http
+    path_prefix: /storage/v1
+    container: { host: storage-service, port: 8083 }
+    build: { context: ../../../storage-service, dockerfile: Dockerfile }
+    compose:
+      memory: { limit: 256m, reservation: 64m }
+      # Loopback only: for callers running on the host (another project's proxy mode).
+      ports: ["127.0.0.1:8083:8083"]
+      networks: [storage]
+      depends_on:
+        - { name: redis, condition: service_healthy }
+      volumes:
+        - "/opt/storage-service:/app/storage"

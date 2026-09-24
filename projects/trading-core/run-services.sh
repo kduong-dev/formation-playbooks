@@ -13,6 +13,9 @@ cd "$SCRIPT_DIR"
 COMPOSE_CMD=(docker compose -f "$SCRIPT_DIR/docker-compose.yml" --project-directory "$SCRIPT_DIR")
 PROXY_CONF="proxy.conf"
 DYNAMIC_DIR="$SCRIPT_DIR/traefik-dynamic"
+# Joined by services that call storage-service (projects/storage-service), which
+# creates it too, so the two stacks can start in either order.
+SHARED_NETWORK="storage"
 
 SERVICES=(
     "account-service:ACCOUNT_SERVICE:/accounts/v1"
@@ -20,7 +23,6 @@ SERVICES=(
     "authentication-service:AUTH_SERVICE:/auth/v1"
     "bot-service:BOT_SERVICE:/bots/v1"
     "reporting-service:REPORTING_SERVICE:/reports/v1"
-    "storage-service:STORAGE_SERVICE:/storage/v1"
     "journal-service:JOURNAL_SERVICE:/journal/v1"
 )
 
@@ -126,6 +128,7 @@ bring_up() {
     require_compose_file
     read_proxied_services
     mkdir -p "$DYNAMIC_DIR"
+    docker network inspect "$SHARED_NETWORK" >/dev/null 2>&1 || docker network create "$SHARED_NETWORK" >/dev/null
 
     if [[ ${#proxied[@]} -eq 0 ]]; then
         echo "Starting all services..."

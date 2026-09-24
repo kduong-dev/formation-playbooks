@@ -10,15 +10,7 @@ directory at `../../../reMarkableShelf`.
 
 ## Secrets
 
-```bash
-# one-time
-openssl rand -base64 32 > .vault_pass
-chmod 600 .vault_pass
-
-ansible-vault edit secrets.yml
-```
-
-`secrets.yml` currently holds `google_books_api_key` and
+Set up as in the [root README](../../README.md#secrets). `secrets.yml` currently holds `google_books_api_key` and
 `remarkable_ssh_password` — both placeholders (`CHANGEME`) until set.
 
 ## Usage

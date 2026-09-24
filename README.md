@@ -10,15 +10,19 @@ they share the rendering logic (Ansible tasks, Jinja templates) under `shared/`.
 formation-playbooks/
   shared/
     tasks/
-      render-service.yml   container/local env merge for a backend service (+ Makefile target collection)
-      render-env.yml        single-mode env merge (used by browser-facing frontends)
+      render-service.yml    container .env + local-mode Makefile target for a backend service
+      render-env.yml        single-mode .env (used by browser-facing frontends)
+      merge-env.yml         resources -> service_environment, used by both of the above
+      write-env.yml         writes service_environment to env_dest
+      render-compose.yml    docker-compose.yml + Traefik routes (skipped with `traefik: false`)
+    docker/
+      backend.Dockerfile    builds any project's Go service (APP_DIR + SERVICE build args)
     templates/
       service.env.j2        KEY=VALUE per line
       docker-compose.yml.j2 compose definition, parameterized by project + services.yml + resources.yml
       traefik-static.yml.j2 Traefik routing for server and local domains
   projects/
-    remarkable-shelf/       reMarkableShelf's formation (see projects/remarkable-shelf/README.md)
-    trading-core/           trading-core's formation (see projects/trading-core/README.md)
+    <name>/                 one self-contained formation per project (see Projects below)
 ```
 
 Each project directory is self-contained: its own `playbook.yml`,
@@ -28,14 +32,29 @@ its own Docker build context. A project's `secrets.yml` and vault password
 are never shared with another project — that boundary is deliberate: a
 compromise or mistake in one project's secrets doesn't touch the other's.
 
+### Secrets
+
+Projects with an `ansible.cfg` read their vault password from `.vault_pass`:
+
+```bash
+# one-time, in the project directory
+openssl rand -base64 32 > .vault_pass
+chmod 600 .vault_pass
+
+ansible-vault create secrets.yml   # or `edit` once it exists
+```
+
+Each project's README lists the vars its `secrets.yml` must define.
+
 ## How a project wires in
 
-A project's `playbook.yml` sets two vars used throughout the shared logic:
+A project's `playbook.yml` sets these vars used throughout the shared logic:
 
 ```yaml
 vars:
   project: <name>                      # used for image tags, Dockerfile paths
   formation_root: "{{ playbook_dir }}/../.."   # points back at this repo's root
+  backend_dir: <repo>/backend          # Go module for shared/docker/backend.Dockerfile, relative to this repo's parent
 ```
 
 The app repo (e.g. `reMarkableShelf`, `trading-backend`) declares what each
@@ -58,12 +77,14 @@ so that include path keeps working without editing the app repos.
 ## Adding a new project
 
 1. `mkdir projects/<name>`
-2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project` and `formation_root`), `backend/Dockerfile`, `frontend/Dockerfile`
+2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`
 3. Add a `tasks/render-service.yml` shim forwarding to `shared/tasks/render-service.yml`
 4. Add `cmd/<service>/formation.yml` in the app repo declaring its resources
-5. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
+5. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create the network in `run-services.sh` before `up` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
+6. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
 
 ## Projects
 
 - [remarkable-shelf](projects/remarkable-shelf/README.md) — single backend service + static frontend, sqlite
 - [trading-core](projects/trading-core/README.md) — multi-service backend + frontend, redis + postgres, proxy mode for host-side debugging
+- [storage-service](projects/storage-service/README.md) — shared blob storage + its own redis, no frontend or Traefik; other projects reach it over the shared `storage` docker network

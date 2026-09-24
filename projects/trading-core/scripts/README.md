@@ -2,10 +2,8 @@
 
 These scripts manage building and deploying the trading stack to `kduong-server`.
 
-**Not yet cut over**: copied from the old `trading-formation` repo, which
-still owns the live deploy. `build.sh`/`deploy.sh` here still point at the
-old server-side paths and git remote — see the `TODO(migration)` notes in
-each script before relying on them from this location.
+**Not yet cut over** — see the [migration status](../README.md) and the
+`TODO(migration)` notes in each script before relying on them.
 
 ## Prerequisites
 
@@ -21,7 +19,7 @@ each script before relying on them from this location.
 ./scripts/build.sh
 
 # Or rebuild a single service
-./scripts/build.sh storage-service
+./scripts/build.sh reporting-service
 
 # 2. Deploy once notified
 ./scripts/deploy.sh

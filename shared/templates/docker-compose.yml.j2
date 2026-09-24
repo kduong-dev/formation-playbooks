@@ -2,6 +2,7 @@
 # Source: {{ project }}/services.yml, {{ project }}/resources.yml, shared/templates/docker-compose.yml.j2
 
 services:
+{% if traefik | default(true) %}
   # File-only provider: routes are generated from services.yml at render time
   # into traefik-dynamic/static.yml. No Docker API access needed.
   traefik:
@@ -17,6 +18,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
+{% endif %}
 {% for res_name in extra_compose_services | default([]) %}
 {% set res = lookup('vars', res_name) %}
 
@@ -54,6 +56,7 @@ services:
     mem_reservation: {{ res.compose.memory.reservation }}
     restart: unless-stopped
 {% endfor %}
+{% if frontend is defined %}
 
   frontend:
     image: {{ project }}-frontend:latest
@@ -74,6 +77,7 @@ services:
     mem_limit: {{ frontend.compose.memory.limit }}
     mem_reservation: {{ frontend.compose.memory.reservation }}
     restart: unless-stopped
+{% endif %}
 {% for key, cfg in services.items() %}
 {% set name = key | replace('_', '-') %}
 
@@ -85,8 +89,9 @@ services:
       dockerfile: {{ cfg.build.dockerfile }}
 {% else %}
       context: ../../..
-      dockerfile: ./formation-playbooks/projects/{{ project }}/backend/Dockerfile
+      dockerfile: ./formation-playbooks/shared/docker/backend.Dockerfile
       args:
+        APP_DIR: {{ backend_dir }}
         SERVICE: {{ name }}
         PORT: {{ cfg.container.port }}
 {% endif %}
@@ -94,6 +99,19 @@ services:
       - ./backend/{{ name }}/.env
     expose:
       - "{{ cfg.container.port }}"
+{% if cfg.compose.ports is defined %}
+    ports:
+{% for port in cfg.compose.ports %}
+      - '{{ port }}'
+{% endfor %}
+{% endif %}
+{% if cfg.compose.networks is defined %}
+    networks:
+      - default
+{% for net in cfg.compose.networks %}
+      - {{ net }}
+{% endfor %}
+{% endif %}
 {% if cfg.compose.depends_on is defined %}
     depends_on:
 {% for dep in cfg.compose.depends_on %}
@@ -115,6 +133,11 @@ services:
 networks:
   default:
     driver: bridge
+{% for net in external_networks | default([]) %}
+  # Shared with other projects' stacks; run-services.sh creates it if missing.
+  {{ net }}:
+    external: true
+{% endfor %}
 {% if named_volumes | default([]) %}
 
 volumes:

@@ -11,21 +11,24 @@
     - library.yml
 
   vars:
-    project: remarkable-shelf
+    project: storage-service
     formation_root: "{{ playbook_dir }}/../.."
-    # Backend Go module, relative to formation-playbooks' parent (the build context).
-    backend_dir: reMarkableShelf/backend
+    extra_compose_services: [redis]
+    # Not browser-facing: callers reach it over the shared network, so there's
+    # no frontend and no Traefik in this stack.
+    traefik: false
+    external_networks: [storage]
 
   tasks:
     # `apply` carries each tag into the included tasks, so e.g. `--tags <service>`
     # renders just that service; a tag on include_tasks alone doesn't reach them.
-    - name: Generate server .env
+    - name: Generate storage-service .env
       include_tasks:
-        file: ../../../reMarkableShelf/backend/cmd/server/formation.yml
+        file: ../../../storage-service/cmd/server/formation.yml
         apply:
-          tags: [server]
+          tags: [storage-service]
       tags:
-        - server
+        - storage-service
 
     - name: Render docker-compose.yml and Traefik routes
       import_tasks: "{{ formation_root }}/shared/tasks/render-compose.yml"

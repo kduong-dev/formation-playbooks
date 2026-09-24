@@ -1,0 +1,13 @@
+---
+# Builds service_environment from the caller's `resources` map
+# ({library section: [entry, ...]}), templated for the caller's `mode`.
+- name: "[{{ service_name | default(env_dest) }}] Reset env ({{ mode }} mode)"
+  set_fact:
+    service_environment: {}
+
+- name: "[{{ service_name | default(env_dest) }}] Merge {{ mode }} resources"
+  set_fact:
+    service_environment: "{{ service_environment | combine(lookup('vars', item.0.key)[item.1]) }}"
+  loop: "{{ resources | dict2items | subelements('value') }}"
+  loop_control:
+    label: "{{ item.0.key }}.{{ item.1 }}"
