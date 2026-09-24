@@ -16,7 +16,8 @@ formation-playbooks/
       write-env.yml         writes service_environment to env_dest
       render-compose.yml    docker-compose.yml + Traefik routes (skipped with `traefik: false`)
     docker/
-      backend.Dockerfile    builds any project's Go service (APP_DIR + SERVICE build args)
+      backend.Dockerfile    builds any project's Go service (APP_DIR + SERVICE build args;
+                            a service's `cmd:` in services.yml overrides SERVICE)
     templates/
       service.env.j2        KEY=VALUE per line
       docker-compose.yml.j2 compose definition, parameterized by project + services.yml + resources.yml

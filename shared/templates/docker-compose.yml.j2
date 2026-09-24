@@ -84,17 +84,12 @@ services:
   {{ name }}:
     image: {{ project }}-{{ name }}:latest
     build:
-{% if cfg.build is defined %}
-      context: {{ cfg.build.context }}
-      dockerfile: {{ cfg.build.dockerfile }}
-{% else %}
       context: ../../..
       dockerfile: ./formation-playbooks/shared/docker/backend.Dockerfile
       args:
         APP_DIR: {{ backend_dir }}
-        SERVICE: {{ name }}
+        SERVICE: {{ cfg.cmd | default(name) }}
         PORT: {{ cfg.container.port }}
-{% endif %}
     env_file:
       - ./backend/{{ name }}/.env
     expose:

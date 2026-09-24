@@ -1,0 +1,5 @@
+# BuildKit reads this in place of a .dockerignore at the context root (the
+# directory holding every app repo), so it covers all of them.
+**/.git
+**/node_modules
+**/tmp
