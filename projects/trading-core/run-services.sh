@@ -217,7 +217,7 @@ case "${1:-}" in
             local_mode_arg="-e local_mode=local"
         fi
         echo "Generating .env files and Makefile from secrets..."
-        ansible-playbook playbook.yml --ask-vault-pass $local_mode_arg
+        ansible-playbook playbook.yml $local_mode_arg
         ;;
     proxy)
         if [[ ! -f "$PROXY_CONF" ]]; then
@@ -262,7 +262,7 @@ Usage: $0 <command>
   delete   Purge containers, images, volumes
   render [--local]   Generate .env files and Makefile via ansible-playbook
                      Default uses .localhost TLD (local dev, no hosts file needed).
-                     --local uses the server domains (*.home); used by build.sh.
+                     --local uses the server domains (*.home); used by scripts/deploy.sh.
   proxy    Seed/edit proxy.conf — flag a service as 1 to run it on the host
   status   Show which proxied services have an active host port file
 EOF

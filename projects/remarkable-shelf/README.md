@@ -27,5 +27,6 @@ Local dev: `http://remarkable-shelf.localhost` (frontend),
 
 ## Server deployment
 
-Not yet set up. See `trading-core`'s `scripts/build.sh` / `scripts/deploy.sh`
-for the pattern (SSH-based build + deploy) once there's a server to target.
+Not yet set up. `trading-core`'s and `storage-service`'s `scripts/deploy.sh`
+show the pattern (render locally, sync code + rendered files, build + up on
+the server).
