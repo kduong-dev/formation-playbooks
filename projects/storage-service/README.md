@@ -43,6 +43,18 @@ Set up as in the [root README](../../README.md#secrets). `secrets.yml` holds
 Start order doesn't matter: this script and each caller's `run-services.sh`
 create the `storage` network if it doesn't exist yet.
 
+## Server deployment
+
+```bash
+./scripts/deploy.sh   # render, sync to kduong-server:/opt/formation, build + up
+```
+
+The server gets the same layout as your machine under `/opt/formation`
+(`formation-playbooks/` and `storage-service/` side by side, since the build
+context is their parent). Only code and this project's rendered
+`docker-compose.yml` and `.env` are synced — never `secrets.yml` or
+`.vault_pass`. `SERVER` and `REMOTE_ROOT` env vars override the defaults.
+
 ## Data
 
 Bytes live in `/opt/storage-service` on the host; metadata lives in the
