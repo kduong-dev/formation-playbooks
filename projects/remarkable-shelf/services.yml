@@ -1,7 +1,7 @@
 ---
-# All external access goes through the shared Traefik (projects/gateway) on :80.
+# All external access goes through the shared Traefik (infra/gateway) on :80.
 # Server names live under .home, which the server's dnsmasq answers for as a
-# whole (see projects/gateway/README.md), so no hosts-file entries.
+# whole (see infra/gateway/README.md), so no hosts-file entries.
 domain: remarkable-shelf.home
 api_domain: api.remarkable-shelf.home
 

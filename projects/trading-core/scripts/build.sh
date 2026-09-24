@@ -48,7 +48,7 @@ main() {
         "backend/reporting-service/.env"
         "backend/stock-screener/.env"
         "frontend/.env"
-        "../gateway/routes/trading-core.yml"
+        "../../infra/gateway/routes/trading-core.yml"
     )
     for f in "${secrets[@]}"; do
         if [[ -f "$FORMATION_DIR/$f" ]]; then

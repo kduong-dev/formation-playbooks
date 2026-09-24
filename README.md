@@ -2,8 +2,9 @@
 
 Centralized Ansible + Docker Compose + Traefik formation for multiple
 projects, all served on one machine through a single shared Traefik
-([projects/gateway](projects/gateway/README.md)). Each project keeps its own secrets, services, and trust boundary;
-they share the rendering logic (Ansible tasks, Jinja templates) under `shared/`.
+([infra/gateway](infra/gateway/README.md)). Each project keeps its own
+secrets, services, and trust boundary; they share the rendering logic (Ansible
+tasks, Jinja templates) under `shared/`.
 
 ## Layout
 
@@ -15,7 +16,7 @@ formation-playbooks/
       render-env.yml        single-mode .env (used by browser-facing frontends)
       merge-env.yml         resources -> service_environment, used by both of the above
       write-env.yml         writes service_environment to env_dest
-      render-compose.yml    docker-compose.yml + the project's routes into projects/gateway/routes/
+      render-compose.yml    docker-compose.yml + the project's routes into infra/gateway/routes/
     docker/
       backend.Dockerfile    builds any project's Go service (APP_DIR + SERVICE build args;
                             a service's `cmd:` in services.yml overrides SERVICE)
@@ -23,8 +24,12 @@ formation-playbooks/
       service.env.j2        KEY=VALUE per line
       docker-compose.yml.j2 compose definition, parameterized by project + services.yml + resources.yml
       traefik-static.yml.j2 a project's routes for the shared Traefik, server and local domains
+    scripts/
+      sync-formation.sh     rsyncs this repo's code (never secrets or rendered files) to the server
   projects/
     <name>/                 one self-contained formation per project (see Projects below)
+  infra/                    stacks the server itself runs for every project (see Infra below)
+    deploy.sh               sync + (re)start them on the server
 ```
 
 Each project directory is self-contained: its own `playbook.yml`,
@@ -84,11 +89,19 @@ so that include path keeps working without editing the app repos.
 4. Add `cmd/<service>/formation.yml` in the app repo declaring its resources
 5. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create it in `run-services.sh` before `up` alongside `gateway` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
 6. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
-7. Give its server domains the `.home` suffix: the server's DNS already answers for everything under it (see [projects/gateway](projects/gateway/README.md#domains))
+7. Give its server domains the `.home` suffix: the server's DNS already answers for everything under it (see [infra/gateway](infra/gateway/README.md#domains))
 
 ## Projects
 
 - [remarkable-shelf](projects/remarkable-shelf/README.md) — single backend service + static frontend, sqlite
 - [trading-core](projects/trading-core/README.md) — multi-service backend + frontend, redis + postgres, proxy mode for host-side debugging
 - [storage-service](projects/storage-service/README.md) — shared blob storage + its own redis, no frontend; other projects' containers reach it over the shared `storage` docker network, everything else at `api.storage-service.home`
-- [gateway](projects/gateway/README.md) — the shared Traefik on :80 that routes every project's domains
+
+## Infra
+
+Not projects: nothing to render and no secrets, so their compose files are
+committed as-is. `infra/deploy.sh [gateway|dnsmasq]` syncs and (re)starts them
+on the server.
+
+- [gateway](infra/gateway/README.md) — the shared Traefik on :80 that routes every project's domains
+- [dnsmasq](infra/dnsmasq/README.md) — LAN DNS that resolves every `.home` name to the server

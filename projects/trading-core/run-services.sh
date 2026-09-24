@@ -1,6 +1,6 @@
 #!/bin/bash
 # Manage docker-compose for the trading-core project. All external traffic goes through
-# the shared Traefik (projects/gateway) on :80 at <subdomain>.<domain>. When
+# the shared Traefik (infra/gateway) on :80 at <subdomain>.<domain>. When
 # proxy.conf flags a service as 1, it is excluded from compose; the host-side
 # `make run-<svc>` writes its ephemeral port to .proxy-port-<svc>, and this
 # script writes a route file into the gateway's watched directory routing
@@ -13,7 +13,7 @@ cd "$SCRIPT_DIR"
 
 COMPOSE_CMD=(docker compose -f "$SCRIPT_DIR/docker-compose.yml" --project-directory "$SCRIPT_DIR")
 PROXY_CONF="proxy.conf"
-DYNAMIC_DIR="$SCRIPT_DIR/../gateway/routes"
+DYNAMIC_DIR="$SCRIPT_DIR/../../infra/gateway/routes"
 # Route files and names share the gateway with other projects, so they carry
 # the project prefix; trading-core.yml there is the rendered baseline.
 ROUTE_PREFIX="trading-core-"

@@ -3,7 +3,7 @@
 
 {#
   Routable containers (services + frontend) join the shared `gateway` network,
-  where projects/gateway's Traefik reaches them as <project>-<name>; the alias
+  where infra/gateway's Traefik reaches them as <project>-<name>; the alias
   keeps same-named containers from different projects (e.g. two `frontend`s)
   apart. On any other shared network a service is aliased as its
   container.host, the name its callers use. Everything else stays on the

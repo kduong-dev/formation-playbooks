@@ -1,7 +1,7 @@
 #!/bin/bash
 # Manage docker-compose for storage-service. Other projects' containers reach
 # it over the shared `storage` network; everything else through the shared
-# Traefik (projects/gateway) at api.storage-service.home.
+# Traefik (infra/gateway) at api.storage-service.home.
 
 set -euo pipefail
 

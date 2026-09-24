@@ -6,8 +6,7 @@ __pycache__/
 projects/*/.vault_pass
 projects/*/secrets.yml
 projects/*/docker-compose.yml
-!projects/gateway/docker-compose.yml
-projects/gateway/routes/
+infra/gateway/routes/
 projects/*/backend/*/.env
 projects/*/frontend/.env
 projects/*/proxy.conf

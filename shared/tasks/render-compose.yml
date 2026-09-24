@@ -1,6 +1,6 @@
 ---
 # docker-compose.yml into the project's own directory, and the project's
-# routes into the shared Traefik's directory (projects/gateway/routes), which
+# routes into the shared Traefik's directory (infra/gateway/routes), which
 # it watches, so re-rendering updates routing without restarting anything.
 - name: Render docker-compose.yml
   template:
@@ -12,7 +12,7 @@
 
 - name: Ensure gateway routes dir exists
   file:
-    path: "{{ formation_root }}/projects/gateway/routes"
+    path: "{{ formation_root }}/infra/gateway/routes"
     state: directory
     mode: '0755'
   tags:
@@ -21,7 +21,7 @@
 - name: Render Traefik routes
   template:
     src: "{{ formation_root }}/shared/templates/traefik-static.yml.j2"
-    dest: "{{ formation_root }}/projects/gateway/routes/{{ project }}.yml"
+    dest: "{{ formation_root }}/infra/gateway/routes/{{ project }}.yml"
     mode: '0644'
   tags:
     - traefik

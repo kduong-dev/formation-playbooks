@@ -15,6 +15,8 @@ committed as-is.
 
 ## Usage
 
+Deploy from your machine with `infra/deploy.sh gateway`. On the server:
+
 ```bash
 ./run-services.sh up       # start (creates the gateway network and routes/)
 ./run-services.sh routes   # which projects' route files are loaded
@@ -32,8 +34,8 @@ committed as-is.
 
 `.localhost` names resolve to your own machine with no setup. Server names all
 sit under `.home` (not a public TLD, and unlike `.local` it doesn't collide
-with mDNS), and the dnsmasq on kduong-server (`~/dnsmasq/dnsmasq.conf`) answers
-for everything under it with one line:
+with mDNS), and the server's [dnsmasq](../dnsmasq/README.md) answers for
+everything under it with one line:
 
 ```
 address=/home/192.168.1.19

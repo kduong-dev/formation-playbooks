@@ -1,0 +1,12 @@
+# LAN DNS on kduong-server: answers for every formation under .home (routed by
+# infra/gateway) and forwards everything else upstream.
+services:
+  dnsmasq:
+    image: 4km3/dnsmasq:latest
+    container_name: dnsmasq
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf:ro
+    restart: unless-stopped

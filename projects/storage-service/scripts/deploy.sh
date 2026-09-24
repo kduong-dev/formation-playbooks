@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Render locally, sync code + rendered files to the server, then build and
 # start storage-service there and make sure the shared Traefik
-# (projects/gateway) is up to route api.storage-service.home to it. Secrets
+# (infra/gateway) is up to route api.storage-service.home to it. Secrets
 # never leave this machine except as the rendered .env; secrets.yml and
 # .vault_pass are not synced.
 #
@@ -18,7 +18,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FORMATION_DIR="$(cd "$PROJECT_DIR/../.." && pwd)"
 APPS_DIR="$(cd "$FORMATION_DIR/.." && pwd)"
 REMOTE_PROJECT="$REMOTE_ROOT/formation-playbooks/projects/storage-service"
-REMOTE_GATEWAY="$REMOTE_ROOT/formation-playbooks/projects/gateway"
+REMOTE_GATEWAY="$REMOTE_ROOT/formation-playbooks/infra/gateway"
 
 echo "Rendering..."
 "$PROJECT_DIR/run-services.sh" render
@@ -31,19 +31,7 @@ if ! ssh "$SERVER" "mkdir -p '$REMOTE_ROOT' && test -w '$REMOTE_ROOT'"; then
 fi
 
 echo "Syncing code..."
-# Other projects' rendered files carry their secrets, so only code goes up here.
-rsync -az --delete \
-    --exclude .git \
-    --exclude secrets.yml \
-    --exclude .vault_pass \
-    --include 'projects/gateway/docker-compose.yml' \
-    --exclude 'projects/*/docker-compose.yml' \
-    --exclude 'projects/gateway/routes/' \
-    --exclude 'projects/*/backend/*/.env' \
-    --exclude 'projects/*/frontend/.env' \
-    --exclude 'projects/*/proxy.conf' \
-    --exclude 'projects/*/.proxy-port-*' \
-    "$FORMATION_DIR/" "$SERVER:$REMOTE_ROOT/formation-playbooks/"
+"$FORMATION_DIR/shared/scripts/sync-formation.sh" "$SERVER" "$REMOTE_ROOT"
 rsync -az --delete --exclude .git --exclude tmp \
     "$APPS_DIR/storage-service/" "$SERVER:$REMOTE_ROOT/storage-service/"
 
@@ -52,7 +40,7 @@ ssh "$SERVER" "mkdir -p '$REMOTE_PROJECT/backend/api'"
 scp -q "$PROJECT_DIR/docker-compose.yml" "$SERVER:$REMOTE_PROJECT/docker-compose.yml"
 scp -q "$PROJECT_DIR/backend/api/.env" "$SERVER:$REMOTE_PROJECT/backend/api/.env"
 ssh "$SERVER" "chmod 600 '$REMOTE_PROJECT/backend/api/.env' && mkdir -p '$REMOTE_GATEWAY/routes'"
-scp -q "$FORMATION_DIR/projects/gateway/routes/storage-service.yml" "$SERVER:$REMOTE_GATEWAY/routes/storage-service.yml"
+scp -q "$FORMATION_DIR/infra/gateway/routes/storage-service.yml" "$SERVER:$REMOTE_GATEWAY/routes/storage-service.yml"
 
 echo "Building and starting on $SERVER..."
 ssh "$SERVER" "cd '$REMOTE_PROJECT' && docker compose build && ./run-services.sh up"
