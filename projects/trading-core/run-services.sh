@@ -40,7 +40,7 @@ LOCAL_MODE="${LOCAL_MODE:-localhost}"
 
 # Effective domain used for Makefile targets and proxy routes.
 # local_mode=localhost uses the .localhost TLD (resolves natively).
-# local_mode=local uses the .local TLD (requires /etc/hosts).
+# local_mode=local uses the server domains (*.home, via the server's DNS).
 if [[ "$LOCAL_MODE" == "local" ]]; then
     EFFECTIVE_API_DOMAIN="$API_DOMAIN"
 else
@@ -262,7 +262,7 @@ Usage: $0 <command>
   delete   Purge containers, images, volumes
   render [--local]   Generate .env files and Makefile via ansible-playbook
                      Default uses .localhost TLD (local dev, no hosts file needed).
-                     --local uses .local TLD (requires /etc/hosts); used by build.sh.
+                     --local uses the server domains (*.home); used by build.sh.
   proxy    Seed/edit proxy.conf — flag a service as 1 to run it on the host
   status   Show which proxied services have an active host port file
 EOF

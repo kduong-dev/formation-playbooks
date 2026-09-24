@@ -84,11 +84,11 @@ so that include path keeps working without editing the app repos.
 4. Add `cmd/<service>/formation.yml` in the app repo declaring its resources
 5. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create it in `run-services.sh` before `up` alongside `gateway` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
 6. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
-7. For the LAN: add the `.local` domain to the server's dnsmasq (see [projects/gateway](projects/gateway/README.md#domains))
+7. Give its server domains the `.home` suffix: the server's DNS already answers for everything under it (see [projects/gateway](projects/gateway/README.md#domains))
 
 ## Projects
 
 - [remarkable-shelf](projects/remarkable-shelf/README.md) — single backend service + static frontend, sqlite
 - [trading-core](projects/trading-core/README.md) — multi-service backend + frontend, redis + postgres, proxy mode for host-side debugging
-- [storage-service](projects/storage-service/README.md) — shared blob storage + its own redis, no frontend; other projects' containers reach it over the shared `storage` docker network, everything else at `api.storage-service.local`
+- [storage-service](projects/storage-service/README.md) — shared blob storage + its own redis, no frontend; other projects' containers reach it over the shared `storage` docker network, everything else at `api.storage-service.home`
 - [gateway](projects/gateway/README.md) — the shared Traefik on :80 that routes every project's domains

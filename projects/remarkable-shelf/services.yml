@@ -1,10 +1,9 @@
 ---
-# All external access goes through the shared Traefik (projects/gateway) on :80. Add both to your hosts file
-# pointing at the server IP once a server exists:
-#   <server-ip> remarkable-shelf.local
-#   <server-ip> api.remarkable-shelf.local
-domain: remarkable-shelf.local
-api_domain: api.remarkable-shelf.local
+# All external access goes through the shared Traefik (projects/gateway) on :80.
+# Server names live under .home, which the server's dnsmasq answers for as a
+# whole (see projects/gateway/README.md), so no hosts-file entries.
+domain: remarkable-shelf.home
+api_domain: api.remarkable-shelf.home
 
 # Local dev — resolves natively in all browsers, no hosts file needed.
 local_domain: remarkable-shelf.localhost

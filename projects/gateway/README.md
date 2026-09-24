@@ -24,19 +24,28 @@ committed as-is.
 
 ## Domains
 
-| Project | Domains |
-|---|---|
-| remarkable-shelf | `remarkable-shelf.local`, `api.remarkable-shelf.local` |
-| trading-core | `trading-core.local`, `api.trading-core.local` |
-| storage-service | `api.storage-service.local` |
+| Project | Server domains | Local dev |
+|---|---|---|
+| remarkable-shelf | `remarkable-shelf.home`, `api.remarkable-shelf.home` | `*.remarkable-shelf.localhost` |
+| trading-core | `trading-core.home`, `api.trading-core.home` | `*.trading-core.localhost` |
+| storage-service | `api.storage-service.home` | `api.storage-service.localhost` |
 
-Each also has a `.localhost` twin for local dev, which resolves to your own
-machine without any DNS setup. On the LAN, the `.local` names resolve through
-the dnsmasq on kduong-server (`~/dnsmasq/dnsmasq.conf`), one line per project:
+`.localhost` names resolve to your own machine with no setup. Server names all
+sit under `.home` (not a public TLD, and unlike `.local` it doesn't collide
+with mDNS), and the dnsmasq on kduong-server (`~/dnsmasq/dnsmasq.conf`) answers
+for everything under it with one line:
 
 ```
-address=/storage-service.local/192.168.1.19
+address=/home/192.168.1.19
 ```
 
-That also covers subdomains (`api.storage-service.local`). Restart it after
-editing: `cd ~/dnsmasq && docker compose restart`.
+A new project needs no DNS change. Clients do need to ask that dnsmasq for
+these names, once per machine or network:
+
+- **Just a Windows PC** (WSL inherits it), in an Administrator PowerShell:
+  `Add-DnsClientNrptRule -Namespace ".home" -NameServers "192.168.1.19"`.
+  Only these names go to the server; everything else uses your normal DNS.
+- **Every device**: set `192.168.1.19` as the DNS server in the router's DHCP
+  settings. If the server is down, all lookups fail until it's back.
+
+If the server's IP changes, update the dnsmasq line (and the NRPT rule).

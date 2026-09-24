@@ -1,7 +1,7 @@
 ---
-# Routed by the shared Traefik (projects/gateway) on :80. api.storage-service.local
+# Routed by the shared Traefik (projects/gateway) on :80. The .home name
 # resolves via the server's dnsmasq; the .localhost name resolves natively.
-api_domain: api.storage-service.local
+api_domain: api.storage-service.home
 local_api_domain: api.storage-service.localhost
 
 services:

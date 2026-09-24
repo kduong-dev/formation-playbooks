@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Render locally, sync code + rendered files to the server, then build and
 # start storage-service there and make sure the shared Traefik
-# (projects/gateway) is up to route api.storage-service.local to it. Secrets
+# (projects/gateway) is up to route api.storage-service.home to it. Secrets
 # never leave this machine except as the rendered .env; secrets.yml and
 # .vault_pass are not synced.
 #
@@ -62,9 +62,9 @@ echo "Checking storage-service responds..."
 # No key, so 401 means it's up and enforcing auth. Checked directly and through
 # the gateway (Host header, so it doesn't depend on DNS).
 direct="$(ssh "$SERVER" "sleep 3; curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8083/storage/v1/files" || true)"
-routed="$(ssh "$SERVER" "curl -s -o /dev/null -w '%{http_code}' -H 'Host: api.storage-service.local' http://127.0.0.1/storage/v1/files" || true)"
+routed="$(ssh "$SERVER" "curl -s -o /dev/null -w '%{http_code}' -H 'Host: api.storage-service.home' http://127.0.0.1/storage/v1/files" || true)"
 if [[ "$direct" == "401" && "$routed" == "401" ]]; then
-    echo "storage-service is up, directly and via api.storage-service.local (401 without an API key, as expected)."
+    echo "storage-service is up, directly and via api.storage-service.home (401 without an API key, as expected)."
 else
     echo "Unexpected responses — direct: '$direct', via gateway: '$routed'. Logs:" >&2
     ssh "$SERVER" "cd '$REMOTE_PROJECT' && docker compose logs --tail 30 storage-service; cd '$REMOTE_GATEWAY' && docker compose logs --tail 30 traefik" >&2
