@@ -11,9 +11,11 @@ This is the live deployment on kduong-server, replacing the standalone
 [trading-formation](https://github.com/trading-core/trading-formation) repo
 (retired; its data was backed up, not migrated).
 
-App repos are sibling directories under `trading-core/`, one level up from
-where the old `trading-formation` lived — this project reaches them via
-`../../../trading-core/trading-backend` and `../../../trading-core/trading-frontend`.
+The app code is the `trading-core` monorepo, checked out next to this repo —
+this project reaches it via `../../../trading-core/backend` and
+`../../../trading-core/frontend`. Each service's formation (what it
+consumes) lives here, in `backend/<service>/formation.yml` and
+`frontend/formation.yml`, next to its rendered `.env`.
 
 ## Secrets
 
@@ -44,7 +46,7 @@ ansible-vault edit secrets.yml
 ```
 
 The server gets the same layout as your machine under `/opt/formation`
-(`formation-playbooks/` and `trading-core/trading-{backend,frontend}/`, since
+(`formation-playbooks/` and `trading-core/{backend,frontend}/`, since
 the build context is their parent). Only code, this project's rendered
 `docker-compose.yml` / `.env` files and its gateway route file are synced —
 never `secrets.yml` or `.vault_pass`. `SERVER` and `REMOTE_ROOT` env vars

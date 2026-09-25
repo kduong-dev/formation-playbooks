@@ -17,7 +17,7 @@ effective_api_domain: "{{ local_api_domain if (local_mode | default('')) == 'loc
 
 services:
   # The YAML key (underscored) maps to a docker-compose service name and a
-  # trading-backend/cmd/<dir> by replacing _ with -. The path_prefix must match
+  # trading-core/backend/cmd/<dir> by replacing _ with -. The path_prefix must match
   # the PathPrefix() declared in that service's httpapi/Handler.go.
   account_service:
     scheme: http

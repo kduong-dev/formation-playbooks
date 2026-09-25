@@ -1,8 +1,8 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY trading-core/trading-frontend/package.json trading-core/trading-frontend/package-lock.json* ./
+COPY trading-core/frontend/package.json trading-core/frontend/package-lock.json* ./
 RUN npm install
-COPY trading-core/trading-frontend .
+COPY trading-core/frontend .
 COPY formation-playbooks/projects/trading-core/frontend/.env .env
 RUN npm run build
 

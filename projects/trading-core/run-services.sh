@@ -166,7 +166,7 @@ bring_up() {
     echo
     echo "Run each proxied service in its own terminal:"
     for svc in "${proxied[@]}"; do
-        echo "  make -C ../../../trading-core/trading-backend run-$svc"
+        echo "  make -C ../../../trading-core/backend run-$svc"
     done
     echo
     echo "Then run './run-services.sh watch' in another terminal to keep Traefik"

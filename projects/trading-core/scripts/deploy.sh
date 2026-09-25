@@ -7,8 +7,8 @@
 # Server layout mirrors the local one, since the build context is the parent
 # of formation-playbooks:
 #   $REMOTE_ROOT/formation-playbooks/
-#   $REMOTE_ROOT/trading-core/trading-backend/
-#   $REMOTE_ROOT/trading-core/trading-frontend/
+#   $REMOTE_ROOT/trading-core/backend/
+#   $REMOTE_ROOT/trading-core/frontend/
 #
 # storage-service must be deployed too (projects/storage-service) for report
 # uploads; the stacks can start in either order.
@@ -39,9 +39,9 @@ echo "Syncing code..."
 # The backend's Makefile is rendered with secrets inlined, and local .env
 # files would end up in the frontend image, so neither goes up.
 rsync -az --delete --exclude .git --exclude tmp --exclude Makefile \
-    "$APPS_DIR/trading-core/trading-backend/" "$SERVER:$REMOTE_ROOT/trading-core/trading-backend/"
+    "$APPS_DIR/trading-core/backend/" "$SERVER:$REMOTE_ROOT/trading-core/backend/"
 rsync -az --delete --exclude .git --exclude node_modules --exclude .next --exclude '.env*' \
-    "$APPS_DIR/trading-core/trading-frontend/" "$SERVER:$REMOTE_ROOT/trading-core/trading-frontend/"
+    "$APPS_DIR/trading-core/frontend/" "$SERVER:$REMOTE_ROOT/trading-core/frontend/"
 
 echo "Syncing rendered files..."
 dirs=("$REMOTE_PROJECT/frontend" "$REMOTE_GATEWAY/routes")

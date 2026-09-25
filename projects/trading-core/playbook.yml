@@ -14,7 +14,7 @@
     project: trading-core
     formation_root: "{{ playbook_dir }}/../.."
     # Backend Go module, relative to formation-playbooks' parent (the build context).
-    backend_dir: trading-core/trading-backend
+    backend_dir: trading-core/backend
     extra_compose_services: [redis, postgres]
     external_networks: [storage]
     frontend_env_file: true
@@ -25,7 +25,7 @@
     # renders just that service; a tag on include_tasks alone doesn't reach them.
     - name: Generate account-service .env
       include_tasks:
-        file: ../../../trading-core/trading-backend/cmd/account-service/formation.yml
+        file: backend/account-service/formation.yml
         apply:
           tags: [account-service]
       tags:
@@ -33,7 +33,7 @@
 
     - name: Generate stock-screener .env
       include_tasks:
-        file: ../../../trading-core/trading-backend/cmd/stock-screener/formation.yml
+        file: backend/stock-screener/formation.yml
         apply:
           tags: [stock-screener]
       tags:
@@ -41,7 +41,7 @@
 
     - name: Generate authentication-service .env
       include_tasks:
-        file: ../../../trading-core/trading-backend/cmd/authentication-service/formation.yml
+        file: backend/authentication-service/formation.yml
         apply:
           tags: [authentication-service]
       tags:
@@ -49,7 +49,7 @@
 
     - name: Generate bot-service .env
       include_tasks:
-        file: ../../../trading-core/trading-backend/cmd/bot-service/formation.yml
+        file: backend/bot-service/formation.yml
         apply:
           tags: [bot-service]
       tags:
@@ -57,7 +57,7 @@
 
     - name: Generate reporting-service .env
       include_tasks:
-        file: ../../../trading-core/trading-backend/cmd/reporting-service/formation.yml
+        file: backend/reporting-service/formation.yml
         apply:
           tags: [reporting-service]
       tags:
@@ -65,7 +65,7 @@
 
     - name: Generate journal-service .env
       include_tasks:
-        file: ../../../trading-core/trading-backend/cmd/journal-service/formation.yml
+        file: backend/journal-service/formation.yml
         apply:
           tags: [journal-service]
       tags:
@@ -73,7 +73,7 @@
 
     - name: Generate frontend .env
       include_tasks:
-        file: ../../../trading-core/trading-frontend/formation.yml
+        file: frontend/formation.yml
         apply:
           tags: [frontend]
       tags:
@@ -82,7 +82,7 @@
     - name: Render proxy Makefile
       template:
         src: "{{ playbook_dir }}/templates/Makefile.j2"
-        dest: ../../../trading-core/trading-backend/Makefile
+        dest: ../../../trading-core/backend/Makefile
         mode: '0644'
       tags:
         - makefile

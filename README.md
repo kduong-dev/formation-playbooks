@@ -64,8 +64,9 @@ vars:
   backend_dir: <repo>/backend          # Go module for shared/docker/backend.Dockerfile, relative to this repo's parent
 ```
 
-The app repo (e.g. `reMarkableShelf`, `trading-backend`) declares what each
-service consumes in its own `cmd/<service>/formation.yml`:
+The app repo (e.g. `reMarkableShelf`) declares what each service consumes in
+its own `cmd/<service>/formation.yml` (trading-core is the exception: its
+formation files live in `projects/trading-core` itself):
 
 ```yaml
 resources:

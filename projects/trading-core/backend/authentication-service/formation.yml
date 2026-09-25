@@ -1,0 +1,10 @@
+---
+- name: Render authentication-service
+  include_tasks: "{{ playbook_dir }}/tasks/render-service.yml"
+  vars:
+    service_name: authentication-service
+    cmd_dir: cmd/authentication-service
+    env_dest: backend/authentication-service/.env
+    resources:
+      secrets: [token]
+      stores:  [user_postgres]
