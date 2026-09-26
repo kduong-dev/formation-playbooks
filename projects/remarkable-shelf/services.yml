@@ -3,15 +3,12 @@
 # Server names live under .home, which the server's dnsmasq answers for as a
 # whole (see infra/gateway/README.md), so no hosts-file entries.
 domain: remarkable-shelf.home
-api_domain: api.remarkable-shelf.home
 
 # Local dev — resolves natively in all browsers, no hosts file needed.
 local_domain: remarkable-shelf.localhost
-local_api_domain: api.remarkable-shelf.localhost
 
-# The frontend calls its API by relative path (/api/...), so the server is
-# routed on the frontend's domains too, not only the api. ones.
-api_on_domain: true
+# No api_domain / local_api_domain: the frontend calls its API by relative
+# path (/api/...), so the server is routed on the frontend's domains.
 
 services:
   # The YAML key (underscored) maps to a docker-compose service name and a

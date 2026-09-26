@@ -36,6 +36,10 @@ Every project follows the same naming, set in its `services.yml`
 | Frontend | `<project>.home` | `<project>.localhost` |
 | API | `api.<project>.home` | `api.<project>.localhost` |
 
+A project whose frontend calls its API by relative path (`/api/...`) leaves
+`api_domain` / `local_api_domain` out, and its services are routed on the
+frontend's domains instead (e.g. `remarkable-shelf.home/api`).
+
 `.localhost` names resolve to your own machine with no setup. Server names all
 sit under `.home` (not a public TLD, and unlike `.local` it doesn't collide
 with mDNS), and the server's [dnsmasq](../dnsmasq/README.md) answers for

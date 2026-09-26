@@ -7,7 +7,7 @@
 
 BACKEND_DIR={{ backend_dir }}
 # Every host the service's rendered routes match (see traefik-static.yml.j2).
-API_DOMAINS=({{ api_domain }} {{ local_api_domain }}{% if api_on_domain | default(false) %} {{ domain }} {{ local_domain }}{% endif %})
+API_DOMAINS=({{ api_domain | default(domain) }} {{ local_api_domain | default(local_domain) }})
 # <service> <path_prefix> <cmd dir>
 SERVICES=(
 {% for key, cfg in services.items() %}
