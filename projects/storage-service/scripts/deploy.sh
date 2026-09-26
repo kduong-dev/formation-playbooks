@@ -11,12 +11,10 @@
 #   $REMOTE_ROOT/storage-service/
 set -euo pipefail
 
-SERVER="${SERVER:-kduong-server}"
-REMOTE_ROOT="${REMOTE_ROOT:-/opt/formation}"
-
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FORMATION_DIR="$(cd "$PROJECT_DIR/../.." && pwd)"
 APPS_DIR="$(cd "$FORMATION_DIR/.." && pwd)"
+source "$FORMATION_DIR/shared/scripts/deploy-target.sh"
 REMOTE_PROJECT="$REMOTE_ROOT/formation-playbooks/projects/storage-service"
 REMOTE_GATEWAY="$REMOTE_ROOT/formation-playbooks/infra/gateway"
 

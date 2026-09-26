@@ -1,6 +1,6 @@
 ---
 # Container-mode .env for docker-compose, then the local-mode env as a
-# Makefile target for running the service on the host.
+# sourceable host.env for running the service on the host (proxy mode).
 - include_tasks: "{{ formation_root }}/shared/tasks/merge-env.yml"
   vars:
     mode: container
@@ -11,6 +11,8 @@
   vars:
     mode: local
 
-- name: "[{{ service_name }}] Collect Makefile target"
-  set_fact:
-    makefile_targets: "{{ makefile_targets | default([]) + [{'name': service_name, 'repo_dir': repo_dir | default(''), 'cmd_dir': cmd_dir, 'env': service_environment}] }}"
+- name: "[{{ service_name }}] Render host.env"
+  template:
+    src: "{{ formation_root }}/shared/templates/host.env.j2"
+    dest: "{{ env_dest | dirname }}/host.env"
+    mode: '0600'

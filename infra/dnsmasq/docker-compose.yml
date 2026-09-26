@@ -1,4 +1,4 @@
-# LAN DNS on kduong-server: answers for every formation under .home (routed by
+# LAN DNS on your server: answers for every formation under .home (routed by
 # infra/gateway) and forwards everything else upstream.
 services:
   dnsmasq:

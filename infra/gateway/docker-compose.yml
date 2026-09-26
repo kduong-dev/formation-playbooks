@@ -14,7 +14,8 @@ services:
     volumes:
       - ./routes:/etc/traefik/dynamic:ro
     extra_hosts:
-      # Proxy-mode routes (trading-core) point at services run on the host.
+      # Proxy-mode routes (any project's `run-services.sh run`) point at
+      # services run on the host.
       - "host.docker.internal:host-gateway"
     networks:
       - gateway

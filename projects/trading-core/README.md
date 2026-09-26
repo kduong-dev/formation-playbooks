@@ -22,13 +22,10 @@ there too.
 
 ## Usage
 
-On top of the [standard commands](../../README.md#running-a-project):
-
-```bash
-./run-services.sh render --local  # render for the server domains (*.home) instead of .localhost
-./run-services.sh proxy           # edit proxy.conf to run a service on the host instead of in compose
-./run-services.sh watch           # keep Traefik in sync with host-run service ports
-```
+The [standard commands](../../README.md#running-a-project), including
+[proxy mode](../../README.md#proxy-mode) (`./run-services.sh run
+account-service`). redis and postgres are published on `127.0.0.1` for
+services run on the host.
 
 `scripts/deploy.sh` renders with `--local`, so the server gets the `*.home`
 domains.

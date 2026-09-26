@@ -6,9 +6,8 @@
 # secret, so there's no render step.
 set -euo pipefail
 
-SERVER="${SERVER:-kduong-server}"
-REMOTE_ROOT="${REMOTE_ROOT:-/opt/formation}"
 INFRA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$INFRA_DIR/../shared/scripts/deploy-target.sh"
 
 stacks=("$@")
 [[ ${#stacks[@]} -gt 0 ]] || stacks=(gateway dnsmasq)

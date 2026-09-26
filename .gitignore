@@ -9,5 +9,8 @@ projects/*/docker-compose.yml
 infra/gateway/routes/
 projects/*/backend/*/.env
 projects/*/frontend/.env
+projects/*/backend/*/host.env
+projects/*/.services.sh
 projects/*/proxy.conf
-projects/*/.proxy-port-*
+
+deploy.env

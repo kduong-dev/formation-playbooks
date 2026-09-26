@@ -18,7 +18,6 @@
     extra_compose_services: [redis, postgres]
     external_networks: [storage]
     frontend_env_file: true
-    makefile_targets: []
 
   tasks:
     - name: Render service .env files
@@ -30,14 +29,6 @@
         mode: local
         env_dest: frontend/.env
         resources: "{{ frontend.resources }}"
-
-    - name: Render proxy Makefile
-      template:
-        src: "{{ playbook_dir }}/templates/Makefile.j2"
-        dest: ../../../trading-core/backend/Makefile
-        mode: '0644'
-      tags:
-        - makefile
 
     - name: Render docker-compose.yml and Traefik routes
       import_tasks: "{{ formation_root }}/shared/tasks/render-compose.yml"

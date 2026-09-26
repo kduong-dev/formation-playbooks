@@ -14,12 +14,10 @@
 # uploads; the stacks can start in either order.
 set -euo pipefail
 
-SERVER="${SERVER:-kduong-server}"
-REMOTE_ROOT="${REMOTE_ROOT:-/opt/formation}"
-
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FORMATION_DIR="$(cd "$PROJECT_DIR/../.." && pwd)"
 APPS_DIR="$(cd "$FORMATION_DIR/.." && pwd)"
+source "$FORMATION_DIR/shared/scripts/deploy-target.sh"
 REMOTE_PROJECT="$REMOTE_ROOT/formation-playbooks/projects/trading-core"
 REMOTE_GATEWAY="$REMOTE_ROOT/formation-playbooks/infra/gateway"
 SERVICES=(account-service stock-screener authentication-service bot-service reporting-service journal-service)
@@ -36,8 +34,8 @@ fi
 
 echo "Syncing code..."
 "$FORMATION_DIR/shared/scripts/sync-formation.sh" "$SERVER" "$REMOTE_ROOT"
-# The backend's Makefile is rendered with secrets inlined, and local .env
-# files would end up in the frontend image, so neither goes up.
+# Older formations rendered a Makefile with secrets inlined into the backend,
+# and local .env files would end up in the frontend image, so neither goes up.
 rsync -az --delete --exclude .git --exclude tmp --exclude Makefile \
     "$APPS_DIR/trading-core/backend/" "$SERVER:$REMOTE_ROOT/trading-core/backend/"
 rsync -az --delete --exclude .git --exclude node_modules --exclude .next --exclude '.env*' \
