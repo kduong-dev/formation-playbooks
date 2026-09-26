@@ -4,29 +4,16 @@ Deploys reMarkableShelf: one backend service (`server`) + a static frontend
 (Vite build served by nginx), sqlite for storage.
 
 See the [repo root README](../../README.md) for how the shared rendering
-pipeline works. This project's app repo is
+pipeline works and how to run a project. This project's app repo is
 [reMarkableShelf](https://github.com/kqvd/reMarkableShelf), a sibling
 directory at `../../../reMarkableShelf`.
 
 ## Secrets
 
-Set up as in the [root README](../../README.md#secrets). `secrets.yml` currently holds `google_books_api_key` and
-`remarkable_ssh_password` — both placeholders (`CHANGEME`) until set.
-
-## Usage
-
-```bash
-./run-services.sh render   # .env, docker-compose.yml, Traefik routes
-./run-services.sh start    # render + build + up -d
-./run-services.sh up       # up -d, no rebuild
-./run-services.sh kill     # down --remove-orphans
-```
-
-Local dev: `http://remarkable-shelf.localhost` (frontend),
-`http://api.remarkable-shelf.localhost/api` (backend).
+`secrets.yml` currently holds `google_books_api_key` and
+`remarkable_ssh_password`. Both are placeholders (`CHANGEME`) until set.
 
 ## Server deployment
 
-Not yet set up. `trading-core`'s and `storage-service`'s `scripts/deploy.sh`
-show the pattern (render locally, sync code + rendered files, build + up on
-the server).
+Not yet set up: there's no `scripts/deploy.sh`. Copy the pattern from
+trading-core's or storage-service's.

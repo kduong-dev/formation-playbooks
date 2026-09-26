@@ -53,6 +53,29 @@ ansible-vault create secrets.yml   # or `edit` once it exists
 
 Each project's README lists the vars its `secrets.yml` must define.
 
+## Running a project
+
+Every project has a `run-services.sh` with at least these commands, run from
+its directory:
+
+```bash
+./run-services.sh render   # .env files, docker-compose.yml, Traefik routes
+./run-services.sh start    # render + build + up -d
+./run-services.sh up       # up -d, no rebuild
+./run-services.sh kill     # down --remove-orphans
+```
+
+A project's README lists any extra commands it has.
+
+Projects with a `scripts/deploy.sh` deploy to kduong-server from your machine:
+the script renders locally, syncs code and rendered files to
+`/opt/formation`, then builds and starts the stack there. The server gets the
+same layout as your machine (`formation-playbooks/` next to the app repos,
+since the build context is their parent). Only code, the project's rendered
+`docker-compose.yml` / `.env` files and its gateway route file are synced,
+never `secrets.yml` or `.vault_pass`. The `SERVER` and `REMOTE_ROOT` env vars
+override the defaults.
+
 ## How a project wires in
 
 A project's `playbook.yml` sets these vars used throughout the shared logic:

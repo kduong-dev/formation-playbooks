@@ -26,11 +26,13 @@ Deploy from your machine with `infra/deploy.sh gateway`. On the server:
 
 ## Domains
 
-| Project | Server domains | Local dev |
+Every project follows the same naming, set in its `services.yml`
+(`domain` / `api_domain`, `local_domain` / `local_api_domain`):
+
+| | Server | Local dev |
 |---|---|---|
-| remarkable-shelf | `remarkable-shelf.home`, `api.remarkable-shelf.home` | `*.remarkable-shelf.localhost` |
-| trading-core | `trading-core.home`, `api.trading-core.home` | `*.trading-core.localhost` |
-| storage-service | `api.storage-service.home` | `api.storage-service.localhost` |
+| Frontend | `<project>.home` | `<project>.localhost` |
+| API | `api.<project>.home` | `api.<project>.localhost` |
 
 `.localhost` names resolve to your own machine with no setup. Server names all
 sit under `.home` (not a public TLD, and unlike `.local` it doesn't collide
