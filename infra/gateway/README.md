@@ -15,7 +15,9 @@ committed as-is.
 
 ## Usage
 
-Deploy from your machine with `infra/deploy.sh gateway`. On the server:
+Every project's `run-services.sh start` / `up` starts it if it isn't already
+running, so locally there's nothing to do. Deploy it from your machine with
+`infra/deploy.sh gateway`. To manage it directly, from this directory:
 
 ```bash
 ./run-services.sh up       # start (creates the gateway network and routes/)

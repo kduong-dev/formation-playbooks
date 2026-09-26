@@ -9,6 +9,10 @@ api_domain: api.remarkable-shelf.home
 local_domain: remarkable-shelf.localhost
 local_api_domain: api.remarkable-shelf.localhost
 
+# The frontend calls its API by relative path (/api/...), so the server is
+# routed on the frontend's domains too, not only the api. ones.
+api_on_domain: true
+
 services:
   # The YAML key (underscored) maps to a docker-compose service name and a
   # ../reMarkableShelf/backend/cmd/<dir> by replacing _ with -. The path_prefix

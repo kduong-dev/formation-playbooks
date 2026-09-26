@@ -5,19 +5,25 @@
 # every project's file. Names carry the project prefix so they stay unique
 # there, and backends are addressed by their <project>-<name> alias on the
 # `gateway` network.
+#
+# With `api_on_domain: true`, services are also routed on the frontend's own
+# domains, for a frontend that calls its API by relative path (/api/...).
+# Their routes beat the frontend's catch-all (priority 1).
 
 http:
   routers:
+{% set route_hosts = [('', api_domain), ('-local', local_api_domain)] %}
+{% if api_on_domain | default(false) %}
+{% set route_hosts = route_hosts + [('-domain', domain), ('-domain-local', local_domain)] %}
+{% endif %}
 {% for key, cfg in services.items() %}
 {% set name = project ~ '-' ~ (key | replace('_', '-')) %}
-    {{ name }}:
-      rule: "Host(`{{ api_domain }}`) && PathPrefix(`{{ cfg.path_prefix }}`)"
+{% for suffix, host in route_hosts %}
+    {{ name }}{{ suffix }}:
+      rule: "Host(`{{ host }}`) && PathPrefix(`{{ cfg.path_prefix }}`)"
       service: {{ name }}
       entryPoints: [web]
-    {{ name }}-local:
-      rule: "Host(`{{ local_api_domain }}`) && PathPrefix(`{{ cfg.path_prefix }}`)"
-      service: {{ name }}
-      entryPoints: [web]
+{% endfor %}
 {% endfor %}
 {% if frontend is defined %}
     {{ project }}-frontend:

@@ -77,11 +77,23 @@ read_proxied_services() {
     return 0
 }
 
+# Every project's routes are served by the shared Traefik (infra/gateway), so
+# without it nothing answers on :80. Starts it if it isn't already running.
+ensure_gateway() {
+    if [[ -z "$(docker ps -q \
+        --filter label=com.docker.compose.project=gateway \
+        --filter label=com.docker.compose.service=traefik)" ]]; then
+        echo "Starting the shared gateway (infra/gateway)..."
+        "$FORMATION_ROOT/infra/gateway/run-services.sh" up
+    fi
+}
+
 bring_up() {
     local build_flag="${1:-}"
     require_compose_file
     read_proxied_services
     ensure_networks
+    ensure_gateway
 
     if [[ ${#proxied[@]} -eq 0 ]]; then
         "${COMPOSE_CMD[@]}" up ${build_flag} -d --remove-orphans

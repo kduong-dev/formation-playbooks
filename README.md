@@ -65,10 +65,21 @@ so they all have the same commands, run from the project's directory:
 
 ```bash
 ./run-services.sh render [--local]  # .env files, docker-compose.yml, Traefik routes (--local: *.home URLs)
-./run-services.sh start             # render + build + up -d
+./run-services.sh start             # render + build + up -d (also starts infra/gateway if it isn't running)
 ./run-services.sh up                # up -d, no rebuild
 ./run-services.sh kill              # down --remove-orphans
 ./run-services.sh delete            # also remove images and volumes
+```
+
+To run every project at once, with the gateway, use `run-local.sh` at the repo
+root. It starts storage-service first, since the other projects call it, and
+if one project fails it carries on with the rest:
+
+```bash
+./run-local.sh start    # gateway up, then every project's start
+./run-local.sh up       # same, without render or rebuild
+./run-local.sh kill     # every project's kill, then the gateway's
+./run-local.sh status   # all running containers
 ```
 
 ### Proxy mode
@@ -150,7 +161,7 @@ formation files.
 ## Adding a new project
 
 1. `mkdir projects/<name>`
-2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, `import_tasks` `shared/tasks/render-services.yml`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`, and `api_domain` / `local_api_domain` (plus `domain` / `local_domain` with a frontend) in `services.yml`
+2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, `import_tasks` `shared/tasks/render-services.yml`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`, and `api_domain` / `local_api_domain` (plus `domain` / `local_domain` with a frontend) in `services.yml`; add `api_on_domain: true` if the frontend calls its API by relative path, so the services are also routed on the frontend's domains (see remarkable-shelf's)
 3. Declare each service's `resources` in its `services.yml` entry
 4. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, add it to `SHARED_NETWORKS` in `run-services.sh` alongside `gateway` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
 5. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var

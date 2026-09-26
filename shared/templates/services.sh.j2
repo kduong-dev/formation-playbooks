@@ -6,7 +6,8 @@
 # API hosts its proxy route matches, and each service's path prefix and cmd.
 
 BACKEND_DIR={{ backend_dir }}
-API_DOMAINS=({{ api_domain }} {{ local_api_domain }})
+# Every host the service's rendered routes match (see traefik-static.yml.j2).
+API_DOMAINS=({{ api_domain }} {{ local_api_domain }}{% if api_on_domain | default(false) %} {{ domain }} {{ local_domain }}{% endif %})
 # <service> <path_prefix> <cmd dir>
 SERVICES=(
 {% for key, cfg in services.items() %}
