@@ -24,8 +24,8 @@ there too.
 
 The [standard commands](../../README.md#running-a-project), including
 [proxy mode](../../README.md#proxy-mode) (`./run-services.sh run
-account-service`). redis and postgres are published on `127.0.0.1` for
-services run on the host.
+account-service`). redis and postgres are published on `127.0.0.1`, on
+ports Docker picks (`./run-services.sh ports`), for services run on the host.
 
 `scripts/deploy.sh` renders with `--local`, so the server gets the `*.home`
 domains.

@@ -1,11 +1,11 @@
 ---
 redis:
   container: { address: redis:6379 }
-  local:     { address: localhost:6380 }
+  local:     { address: "localhost:<host-port:redis:6379>" }
   compose:
     image: redis:7-alpine
-    # 6380 so it doesn't collide with another project's redis on the host.
-    ports: ["127.0.0.1:6380:6379"]
+    # Loopback only, on a port Docker picks (see trading-core's redis).
+    ports: ["127.0.0.1::6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

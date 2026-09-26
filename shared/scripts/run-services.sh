@@ -132,8 +132,57 @@ write_proxy_route() {
     } > "$(proxy_route_file "$svc")"
 }
 
+# Resources publish on a loopback port Docker picks, so `local` addresses carry
+# <host-port:[project/]service:port> instead of a number. Prints the host port
+# Docker published that container port on, looking in this project unless
+# another is named.
+resolve_host_port() {
+    local ref="$1" project="$PROJECT" svc cport cid published
+    if [[ "$ref" == */* ]]; then
+        project="${ref%%/*}"
+        ref="${ref#*/}"
+    fi
+    svc="${ref%%:*}"
+    cport="${ref#*:}"
+    cid="$(docker ps -q \
+        --filter "label=com.docker.compose.project=$project" \
+        --filter "label=com.docker.compose.service=$svc" | head -n1)"
+    if [[ -z "$cid" ]]; then
+        echo "$project's $svc isn't running; start it with its './run-services.sh up'." >&2
+        return 1
+    fi
+    published="$(docker port "$cid" "$cport/tcp" 2>/dev/null | head -n1)"
+    if [[ -z "$published" ]]; then
+        echo "$project's $svc doesn't publish port $cport; add it to its compose.ports." >&2
+        return 1
+    fi
+    echo "${published##*:}"
+}
+
+# Prints a host.env with each <host-port:...> replaced by its current port.
+resolve_host_env() {
+    local file="$1" env token port
+    env="$(<"$file")"
+    for token in $(grep -o '<host-port:[^>]*>' "$file" | sort -u || true); do
+        port="$(resolve_host_port "${token:11:-1}")" || return 1
+        env="${env//"$token"/$port}"
+    done
+    printf '%s\n' "$env"
+}
+
+# Every published port of this project's running containers.
+show_ports() {
+    require_compose_file
+    local svc cid
+    for svc in $("${COMPOSE_CMD[@]}" config --services); do
+        cid="$("${COMPOSE_CMD[@]}" ps -q "$svc" 2>/dev/null || true)"
+        [[ -n "$cid" ]] || continue
+        docker port "$cid" | sed "s/^/$svc  /"
+    done
+}
+
 run_on_host() {
-    local svc="${1:-}" entry name prefix cmd_dir port route
+    local svc="${1:-}" entry name prefix cmd_dir port route env
     load_services
     for entry in "${SERVICES[@]}"; do
         read -r name prefix cmd_dir <<<"$entry"
@@ -150,6 +199,9 @@ run_on_host() {
         exit 1
     fi
 
+    # Before stopping anything, so an unpublished resource fails cleanly.
+    env="$(resolve_host_env "backend/$svc/host.env")"
+
     if [[ -f docker-compose.yml ]]; then
         "${COMPOSE_CMD[@]}" rm -fs "$svc" >/dev/null 2>&1 || true
     fi
@@ -163,7 +215,7 @@ run_on_host() {
     (
         set -a
         # shellcheck disable=SC1090
-        source "backend/$svc/host.env"
+        source <(printf '%s\n' "$env")
         set +a
         PORT="$port" go -C "$APPS_DIR/$BACKEND_DIR" run "./$cmd_dir"
     )
@@ -216,6 +268,7 @@ Usage: $0 <command>
   proxy             Seed/edit proxy.conf — flag a service as 1 to keep it out of compose
   run <service>     Run a service on the host, routed through the gateway until it exits
   status            Show which services are running on the host
+  ports             Show the loopback ports Docker published this project's containers on
 EOF
 }
 
@@ -237,6 +290,7 @@ case "${1:-}" in
     proxy)  edit_proxy_conf ;;
     run)    run_on_host "${2:-}" ;;
     status) proxy_status ;;
+    ports)  show_ports ;;
     *)
         usage
         exit 1

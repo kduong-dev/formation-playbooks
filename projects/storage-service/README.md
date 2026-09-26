@@ -7,8 +7,8 @@ the shared external docker network `storage`; anything else (your machine,
 other LAN devices) goes through the shared Traefik at
 `http://api.storage-service.home/storage/v1`, or
 `api.storage-service.localhost` in local dev. For callers running on the
-server's host (e.g. another project's proxy mode), it is also published on
-`127.0.0.1:8083`.
+server's host (e.g. another project's proxy mode), it is also published on a
+loopback port Docker picks; `./run-services.sh ports` shows it.
 
 See the [repo root README](../../README.md) for how the shared rendering
 pipeline works and how to run and deploy a project. The app repo is a sibling

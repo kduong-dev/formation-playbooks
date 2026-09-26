@@ -47,7 +47,8 @@ ssh "$SERVER" "'$REMOTE_GATEWAY/run-services.sh' up"
 echo "Checking storage-service responds..."
 # No key, so 401 means it's up and enforcing auth. Checked directly and through
 # the gateway (Host header, so it doesn't depend on DNS).
-direct="$(ssh "$SERVER" "sleep 3; curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8083/storage/v1/files" || true)"
+# The loopback port is Docker-assigned, so ask compose for it.
+direct="$(ssh "$SERVER" "sleep 3; cd '$REMOTE_PROJECT' && curl -s -o /dev/null -w '%{http_code}' http://\$(docker compose port api 8083)/storage/v1/files" || true)"
 routed="$(ssh "$SERVER" "curl -s -o /dev/null -w '%{http_code}' -H 'Host: api.storage-service.home' http://127.0.0.1/storage/v1/files" || true)"
 if [[ "$direct" == "401" && "$routed" == "401" ]]; then
     echo "storage-service is up, directly and via api.storage-service.home (401 without an API key, as expected)."

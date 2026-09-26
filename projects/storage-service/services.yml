@@ -21,8 +21,9 @@ services:
     cmd: server
     compose:
       memory: { limit: 256m, reservation: 64m }
-      # Loopback only: for callers running on the host (another project's proxy mode).
-      ports: ["127.0.0.1:8083:8083"]
+      # Loopback only, on a port Docker picks: for callers running on the host
+      # (another project's proxy mode), which resolve it with <host-port:storage-service/api:8083>.
+      ports: ["127.0.0.1::8083"]
       networks: [storage]
       depends_on:
         - { name: redis, condition: service_healthy }

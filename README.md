@@ -79,6 +79,7 @@ reached through the gateway at its usual API host and path prefix:
 ```bash
 ./run-services.sh run <service>   # e.g. run account-service
 ./run-services.sh status          # which services are running on the host
+./run-services.sh ports           # loopback ports Docker published the project's containers on
 ./run-services.sh proxy           # edit proxy.conf: services flagged 1 stay out of start/up
 ```
 
@@ -88,8 +89,17 @@ rendered route for the same host + path prefix, and `go run`s the service's
 `cmd/<dir>` in the project's `backend_dir` with the rendered
 `backend/<service>/host.env` (its `local` mode env) and `PORT`. Ctrl-C
 removes the route. The host process reaches the project's other resources
-through their `local` addresses, so publish those on `127.0.0.1` in the
-resource's `compose.ports` (see trading-core's redis and postgres). Callers in
+through their `local` addresses, so publish those in the resource's
+`compose.ports` on `127.0.0.1` with no host port (`"127.0.0.1::6379"`), and
+let Docker pick a free one. That way no two projects, and nothing else
+installed on the machine, can collide. In the `local` address, write
+`<host-port:redis:6379>` where the port goes, or
+`<host-port:storage-service/api:8083>` for another project's container. `run`
+replaces each one with the port Docker published before it sources
+`host.env`, and refuses to start if that container isn't up. Ports change
+whenever a container is recreated, so restart host-run services after
+recreating a resource. Use `./run-services.sh ports` to find a port for your
+own tools (`psql`, `redis-cli`). See trading-core's redis and postgres. Callers in
 other containers still use the container address, so only traffic through
 the gateway reaches the host process.
 
