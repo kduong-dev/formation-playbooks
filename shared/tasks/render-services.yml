@@ -1,0 +1,16 @@
+---
+# Renders every entry in the project's `services` from its `resources`. The
+# key maps to the service name by replacing _ with -, and `cmd` overrides its
+# cmd/<dir> when the two differ, matching docker-compose.yml.j2.
+- name: Render services
+  include_tasks: "{{ formation_root }}/shared/tasks/render-service.yml"
+  loop: "{{ services | dict2items }}"
+  # merge-env.yml loops with `item`, and these vars are evaluated lazily inside it.
+  loop_control:
+    loop_var: service
+    label: "{{ service.key }}"
+  vars:
+    service_name: "{{ service.key | replace('_', '-') }}"
+    cmd_dir: "cmd/{{ service.value.cmd | default(service_name) }}"
+    env_dest: "backend/{{ service_name }}/.env"
+    resources: "{{ service.value.resources }}"

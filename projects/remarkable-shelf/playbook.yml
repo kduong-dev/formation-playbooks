@@ -17,15 +17,8 @@
     backend_dir: reMarkableShelf/backend
 
   tasks:
-    # `apply` carries each tag into the included tasks, so e.g. `--tags <service>`
-    # renders just that service; a tag on include_tasks alone doesn't reach them.
-    - name: Generate server .env
-      include_tasks:
-        file: ../../../reMarkableShelf/backend/cmd/server/formation.yml
-        apply:
-          tags: [server]
-      tags:
-        - server
+    - name: Render service .env files
+      import_tasks: "{{ formation_root }}/shared/tasks/render-services.yml"
 
     - name: Render docker-compose.yml and Traefik routes
       import_tasks: "{{ formation_root }}/shared/tasks/render-compose.yml"

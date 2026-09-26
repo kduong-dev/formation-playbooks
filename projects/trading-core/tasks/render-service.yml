@@ -1,5 +1,0 @@
----
-# Forwarding shim: backend/*/formation.yml include tasks
-# via "{{ playbook_dir }}/tasks/render-service.yml" (playbook_dir = this
-# project's directory), so the real, shared logic lives one level up.
-- include_tasks: "{{ formation_root }}/shared/tasks/render-service.yml"

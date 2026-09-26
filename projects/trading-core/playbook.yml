@@ -21,63 +21,15 @@
     makefile_targets: []
 
   tasks:
-    # `apply` carries each tag into the included tasks, so e.g. `--tags <service>`
-    # renders just that service; a tag on include_tasks alone doesn't reach them.
-    - name: Generate account-service .env
-      include_tasks:
-        file: backend/account-service/formation.yml
-        apply:
-          tags: [account-service]
-      tags:
-        - account-service
+    - name: Render service .env files
+      import_tasks: "{{ formation_root }}/shared/tasks/render-services.yml"
 
-    - name: Generate stock-screener .env
-      include_tasks:
-        file: backend/stock-screener/formation.yml
-        apply:
-          tags: [stock-screener]
-      tags:
-        - stock-screener
-
-    - name: Generate authentication-service .env
-      include_tasks:
-        file: backend/authentication-service/formation.yml
-        apply:
-          tags: [authentication-service]
-      tags:
-        - authentication-service
-
-    - name: Generate bot-service .env
-      include_tasks:
-        file: backend/bot-service/formation.yml
-        apply:
-          tags: [bot-service]
-      tags:
-        - bot-service
-
-    - name: Generate reporting-service .env
-      include_tasks:
-        file: backend/reporting-service/formation.yml
-        apply:
-          tags: [reporting-service]
-      tags:
-        - reporting-service
-
-    - name: Generate journal-service .env
-      include_tasks:
-        file: backend/journal-service/formation.yml
-        apply:
-          tags: [journal-service]
-      tags:
-        - journal-service
-
-    - name: Generate frontend .env
-      include_tasks:
-        file: frontend/formation.yml
-        apply:
-          tags: [frontend]
-      tags:
-        - frontend
+    - name: Render frontend .env
+      include_tasks: "{{ formation_root }}/shared/tasks/render-env.yml"
+      vars:
+        mode: local
+        env_dest: frontend/.env
+        resources: "{{ frontend.resources }}"
 
     - name: Render proxy Makefile
       template:

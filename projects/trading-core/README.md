@@ -13,9 +13,9 @@ This is the live deployment on kduong-server, replacing the standalone
 
 The app code is the `trading-core` monorepo, checked out next to this repo —
 this project reaches it via `../../../trading-core/backend` and
-`../../../trading-core/frontend`. Each service's formation (what it
-consumes) lives here, in `backend/<service>/formation.yml` and
-`frontend/formation.yml`, next to its rendered `.env`.
+`../../../trading-core/frontend`. What each service consumes is its
+`resources` in `services.yml`, and the frontend's is `frontend.resources`
+there too.
 
 ## Secrets
 

@@ -64,33 +64,32 @@ vars:
   backend_dir: <repo>/backend          # Go module for shared/docker/backend.Dockerfile, relative to this repo's parent
 ```
 
-The app repo (e.g. `reMarkableShelf`) declares what each service consumes in
-its own `cmd/<service>/formation.yml` (trading-core is the exception: its
-formation files live in `projects/trading-core` itself):
+Each entry in `services.yml` declares what that service consumes under
+`resources`, as library sections and their entries:
 
 ```yaml
-resources:
-  secrets: [google_books, remarkable_ssh]
-  config:  [server]
-  stores:  [sqlite]
+services:
+  server:
+    resources:
+      secrets: [google_books, remarkable_ssh]
+      config:  [server]
+      stores:  [sqlite]
 ```
 
-That file does `include_tasks: "{{ playbook_dir }}/tasks/render-service.yml"`
-— `playbook_dir` always resolves to whichever project's `playbook.yml` is
-running, so the app repos never need to know about `formation-playbooks`'
-internal layout. Each project directory has a two-line shim at
-`tasks/render-service.yml` that forwards to `shared/tasks/render-service.yml`,
-so that include path keeps working without editing the app repos.
+The playbook's `import_tasks` of `shared/tasks/render-services.yml` loops over
+`services` and renders each one's `backend/<service>/.env` and Makefile target.
+The key maps to the service name by replacing `_` with `-`, and to its
+`cmd/<dir>` the same way unless `cmd:` overrides it. The app repos carry no
+formation files.
 
 ## Adding a new project
 
 1. `mkdir projects/<name>`
-2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`, and `api_domain` / `local_api_domain` (plus `domain` / `local_domain` with a frontend) in `services.yml`
-3. Add a `tasks/render-service.yml` shim forwarding to `shared/tasks/render-service.yml`
-4. Add `cmd/<service>/formation.yml` in the app repo declaring its resources
-5. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create it in `run-services.sh` before `up` alongside `gateway` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
-6. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
-7. Give its server domains the `.home` suffix: the server's DNS already answers for everything under it (see [infra/gateway](infra/gateway/README.md#domains))
+2. Add `services.yml`, `resources.yml`, `library.yml`, `secrets.yml` (own vault password), `playbook.yml` (set `project`, `formation_root` and `backend_dir`, `import_tasks` `shared/tasks/render-services.yml`, and end with an `import_tasks` of `shared/tasks/render-compose.yml`), `frontend/Dockerfile`, and `api_domain` / `local_api_domain` (plus `domain` / `local_domain` with a frontend) in `services.yml`
+3. Declare each service's `resources` in its `services.yml` entry
+4. If the project calls storage-service: add `storage` to `external_networks` in `playbook.yml`, add `networks: [storage]` to the calling services' `compose:` block, create it in `run-services.sh` before `up` alongside `gateway` (see trading-core's), and register the project's API key hash in storage-service's `storage_clients_b64_json`
+5. If the project needs extra compose containers (redis, postgres, ...), define them in `resources.yml` with a `compose:` block and list them in `playbook.yml`'s `extra_compose_services` var
+6. Give its server domains the `.home` suffix: the server's DNS already answers for everything under it (see [infra/gateway](infra/gateway/README.md#domains))
 
 ## Projects
 
