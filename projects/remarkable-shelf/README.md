@@ -10,8 +10,12 @@ directory at `../../../reMarkableShelf`.
 
 ## Secrets
 
-`secrets.yml` holds `remarkable_ssh_password`, a placeholder (`CHANGEME`)
-until set. Book search uses Open Library, which needs no API key.
+The server needs no tablet password. It signs in to tablets with its own
+SSH key, generated on first start as `remarkable-shelf_ed25519` beside the
+database in the `remarkable-shelf-db` volume, and installed on each tablet
+when it's paired from the Sync page, which asks for the tablet's password
+once and doesn't store it. `secrets.yml`'s `remarkable_ssh_password` is no
+longer used. Book search uses Open Library, which needs no API key.
 
 ## Server deployment
 
