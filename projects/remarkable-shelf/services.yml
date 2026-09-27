@@ -16,7 +16,7 @@ services:
   # must match the API's mux route prefix.
   server:
     resources:
-      secrets: [google_books, remarkable_ssh]
+      secrets: [remarkable_ssh]
       config:  [server]
       stores:  [sqlite]
     scheme: http

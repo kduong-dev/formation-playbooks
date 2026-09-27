@@ -147,7 +147,7 @@ Each entry in `services.yml` declares what that service consumes under
 services:
   server:
     resources:
-      secrets: [google_books, remarkable_ssh]
+      secrets: [remarkable_ssh]
       config:  [server]
       stores:  [sqlite]
 ```

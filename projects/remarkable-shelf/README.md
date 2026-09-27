@@ -5,13 +5,13 @@ Deploys reMarkableShelf: one backend service (`server`) + a static frontend
 
 See the [repo root README](../../README.md) for how the shared rendering
 pipeline works and how to run a project. This project's app repo is
-[reMarkableShelf](https://github.com/kqvd/reMarkableShelf), a sibling
+[reMarkableShelf](https://github.com/kduong-dev/reMarkableShelf), a sibling
 directory at `../../../reMarkableShelf`.
 
 ## Secrets
 
-`secrets.yml` currently holds `google_books_api_key` and
-`remarkable_ssh_password`. Both are placeholders (`CHANGEME`) until set.
+`secrets.yml` holds `remarkable_ssh_password`, a placeholder (`CHANGEME`)
+until set. Book search uses Open Library, which needs no API key.
 
 ## Server deployment
 
