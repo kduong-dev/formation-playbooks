@@ -1,12 +1,8 @@
 ---
 redis:
-  container: { address: redis:6379 }
-  local:     { address: "localhost:<host-port:redis:6379>" }
+  address: redis:6379
   compose:
     image: redis:7-alpine
-    # Loopback only, on a port Docker picks: for services run on the host
-    # (proxy mode), which `run` resolves from the <host-port:...> above.
-    ports: ["127.0.0.1::6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -16,15 +12,13 @@ redis:
     memory: { limit: 256m, reservation: 64m }
 
 postgres:
-  container: { dsn: "postgresql://postgres:postgres@postgres:5432/trading_auth?sslmode=disable" }
-  local:     { dsn: "postgresql://postgres:postgres@localhost:<host-port:postgres:5432>/trading_auth?sslmode=disable" }
+  dsn: "postgresql://postgres:postgres@postgres:5432/trading_auth?sslmode=disable"
   compose:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: trading_auth
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports: ["127.0.0.1::5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d trading_auth"]
       interval: 5s
@@ -41,25 +35,23 @@ named_volumes:
 logs:
   account_event_log:
     ACCOUNT_EVENT_LOG_FACTORY: REDIS
-    ACCOUNT_EVENT_LOG_REDIS_ADDRESS: "{{ redis[mode].address }}"
+    ACCOUNT_EVENT_LOG_REDIS_ADDRESS: "{{ redis.address }}"
   bot_event_log:
     TRADING_BOT_EVENT_LOG_FACTORY: REDIS
-    TRADING_BOT_EVENT_LOG_REDIS_ADDRESS: "{{ redis[mode].address }}"
+    TRADING_BOT_EVENT_LOG_REDIS_ADDRESS: "{{ redis.address }}"
   reporting_event_log:
     TRADING_REPORT_EVENT_LOG_FACTORY: REDIS
-    TRADING_REPORT_EVENT_LOG_REDIS_ADDRESS: "{{ redis[mode].address }}"
+    TRADING_REPORT_EVENT_LOG_REDIS_ADDRESS: "{{ redis.address }}"
   journal_event_log:
     TRADING_JOURNAL_EVENT_LOG_FACTORY: REDIS
-    TRADING_JOURNAL_EVENT_LOG_REDIS_ADDRESS: "{{ redis[mode].address }}"
+    TRADING_JOURNAL_EVENT_LOG_REDIS_ADDRESS: "{{ redis.address }}"
 
 stores:
   user_postgres:
     USER_STORE_IMPLEMENTATION: POSTGRES
-    USER_STORE_POSTGRES_DATASOURCE_NAME: "{{ postgres[mode].dsn }}"
+    USER_STORE_POSTGRES_DATASOURCE_NAME: "{{ postgres.dsn }}"
 
 # Runs as its own formation (projects/storage-service). Containers reach it over
-# the shared `storage` network; host-run services through its loopback port,
-# which `run` looks up in the storage-service project.
+# the shared `storage` network.
 storage_service:
-  container: { url: "http://storage-service:8083" }
-  local:     { url: "http://localhost:<host-port:storage-service/api:8083>" }
+  url: "http://storage-service:8083"

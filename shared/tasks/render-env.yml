@@ -1,5 +1,6 @@
 ---
-# Single-mode .env (browser-facing frontends); the caller sets `mode`.
+# One .env from the caller's `resources`: a backend service's for
+# docker-compose, or a frontend's.
 - include_tasks: "{{ formation_root }}/shared/tasks/merge-env.yml"
 
 - include_tasks: "{{ formation_root }}/shared/tasks/write-env.yml"

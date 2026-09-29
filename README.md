@@ -12,10 +12,9 @@ tasks, Jinja templates) under `shared/`.
 formation-playbooks/
   shared/
     tasks/
-      render-services.yml   every service's .env files, plus the .services.sh proxy mode reads
-      render-service.yml    container .env + local-mode host.env for a backend service
-      render-env.yml        single-mode .env (used by browser-facing frontends)
-      merge-env.yml         resources -> service_environment, used by both of the above
+      render-services.yml   every backend service's .env, via render-env.yml
+      render-env.yml        one .env from a resources map (backend services, browser-facing frontends)
+      merge-env.yml         resources -> service_environment
       write-env.yml         writes service_environment to env_dest
       render-compose.yml    docker-compose.yml + the project's routes into infra/gateway/routes/
     docker/
@@ -25,8 +24,6 @@ formation-playbooks/
       service.env.j2        KEY=VALUE per line
       docker-compose.yml.j2 compose definition, parameterized by project + services.yml + resources.yml
       traefik-static.yml.j2 a project's routes for the shared Traefik, server and local domains
-      host.env.j2           shell-quoted local-mode env, sourced when a service runs on the host
-      services.sh.j2        each service's path prefix and cmd, for proxy mode
     scripts/
       run-services.sh       every project's commands; sourced by projects/<name>/run-services.sh
       sync-formation.sh     rsyncs this repo's code (never secrets or rendered files) to the server
@@ -82,38 +79,6 @@ if one project fails it carries on with the rest:
 ./run-local.sh status   # all running containers
 ```
 
-### Proxy mode
-
-Any backend service can run on your machine instead of in compose, still
-reached through the gateway at its usual API host and path prefix:
-
-```bash
-./run-services.sh run <service>   # e.g. run account-service
-./run-services.sh status          # which services are running on the host
-./run-services.sh ports           # loopback ports Docker published the project's containers on
-./run-services.sh proxy           # edit proxy.conf: services flagged 1 stay out of start/up
-```
-
-`run` stops the service's container, picks a free port, writes a
-`routes/<project>-proxy-<service>.yml` into the gateway that beats the
-rendered route for the same host + path prefix, and `go run`s the service's
-`cmd/<dir>` in the project's `backend_dir` with the rendered
-`backend/<service>/host.env` (its `local` mode env) and `PORT`. Ctrl-C
-removes the route. The host process reaches the project's other resources
-through their `local` addresses, so publish those in the resource's
-`compose.ports` on `127.0.0.1` with no host port (`"127.0.0.1::6379"`), and
-let Docker pick a free one. That way no two projects, and nothing else
-installed on the machine, can collide. In the `local` address, write
-`<host-port:redis:6379>` where the port goes, or
-`<host-port:storage-service/api:8083>` for another project's container. `run`
-replaces each one with the port Docker published before it sources
-`host.env`, and refuses to start if that container isn't up. Ports change
-whenever a container is recreated, so restart host-run services after
-recreating a resource. Use `./run-services.sh ports` to find a port for your
-own tools (`psql`, `redis-cli`). See trading-core's redis and postgres. Callers in
-other containers still use the container address, so only traffic through
-the gateway reaches the host process.
-
 Projects with a `scripts/deploy.sh` deploy to a remote server from your
 machine. Point them at it once with a gitignored `deploy.env` at the repo root:
 
@@ -153,7 +118,7 @@ services:
 ```
 
 The playbook's `import_tasks` of `shared/tasks/render-services.yml` loops over
-`services` and renders each one's `backend/<service>/.env` and `host.env`.
+`services` and renders each one's `backend/<service>/.env`.
 The key maps to the service name by replacing `_` with `-`, and to its
 `cmd/<dir>` the same way unless `cmd:` overrides it. The app repos carry no
 formation files.

@@ -1,11 +1,8 @@
 ---
 redis:
-  container: { address: redis:6379 }
-  local:     { address: "localhost:<host-port:redis:6379>" }
+  address: redis:6379
   compose:
     image: redis:7-alpine
-    # Loopback only, on a port Docker picks (see trading-core's redis).
-    ports: ["127.0.0.1::6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -20,9 +17,9 @@ named_volumes:
 logs:
   storage_event_log:
     STORAGE_EVENT_LOG_FACTORY: REDIS
-    STORAGE_EVENT_LOG_REDIS_ADDRESS: "{{ redis[mode].address }}"
+    STORAGE_EVENT_LOG_REDIS_ADDRESS: "{{ redis.address }}"
 
 storage:
   filesystem:
     STORAGE: FILESYSTEM
-    STORAGE_FILESYSTEM_DIRECTORY: "{{ '/app/storage' if mode == 'container' else './tmp/storage' }}"
+    STORAGE_FILESYSTEM_DIRECTORY: /app/storage

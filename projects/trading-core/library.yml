@@ -26,18 +26,17 @@ apis:
   frontend:
     FRONTEND_BASE_URL: "http://{{ effective_domain }}"
 
-# In container mode siblings reach each other via the docker network
-# (<container.host>:<container.port>) — direct, no proxy hop. In local/host mode
-# they go through Traefik on :80 at http://<effective_api_domain><path_prefix>.
+# Siblings reach each other via the docker network
+# (<container.host>:<container.port>) — direct, no proxy hop.
 clients:
   account_service:
     ACCOUNT_SERVICE_CLIENT_IMPLEMENTATION: HTTP
     ACCOUNT_SERVICE_SCHEME: "{{ services.account_service.scheme }}"
-    ACCOUNT_SERVICE_HOST: "{{ services.account_service.container.host if mode == 'container' else effective_api_domain }}"
-    ACCOUNT_SERVICE_PORT: "{{ services.account_service.container.port if mode == 'container' else 80 }}"
+    ACCOUNT_SERVICE_HOST: "{{ services.account_service.container.host }}"
+    ACCOUNT_SERVICE_PORT: "{{ services.account_service.container.port }}"
   storage_service:
     STORAGE_SERVICE_CLIENT_IMPLEMENTATION: HTTP
-    STORAGE_SERVICE_URL: "{{ storage_service[mode].url }}"
+    STORAGE_SERVICE_URL: "{{ storage_service.url }}"
 
 # Browser-side URLs always go through Traefik on the single host.
 public_clients:

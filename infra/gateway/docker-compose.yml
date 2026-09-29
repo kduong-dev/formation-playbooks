@@ -13,10 +13,6 @@ services:
       - "80:80"
     volumes:
       - ./routes:/etc/traefik/dynamic:ro
-    extra_hosts:
-      # Proxy-mode routes (any project's `run-services.sh run`) point at
-      # services run on the host.
-      - "host.docker.internal:host-gateway"
     networks:
       - gateway
     mem_limit: 128m

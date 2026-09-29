@@ -3,7 +3,7 @@
 # key maps to the service name by replacing _ with -, and `cmd` overrides its
 # cmd/<dir> when the two differ, matching docker-compose.yml.j2.
 - name: Render services
-  include_tasks: "{{ formation_root }}/shared/tasks/render-service.yml"
+  include_tasks: "{{ formation_root }}/shared/tasks/render-env.yml"
   loop: "{{ services | dict2items }}"
   # merge-env.yml loops with `item`, and these vars are evaluated lazily inside it.
   loop_control:
@@ -14,9 +14,3 @@
     cmd_dir: "cmd/{{ service.value.cmd | default(service_name) }}"
     env_dest: "backend/{{ service_name }}/.env"
     resources: "{{ service.value.resources }}"
-
-- name: Render .services.sh for proxy mode
-  template:
-    src: "{{ formation_root }}/shared/templates/services.sh.j2"
-    dest: "{{ playbook_dir }}/.services.sh"
-    mode: '0644'

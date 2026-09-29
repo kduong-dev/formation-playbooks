@@ -26,7 +26,6 @@
     - name: Render frontend .env
       include_tasks: "{{ formation_root }}/shared/tasks/render-env.yml"
       vars:
-        mode: local
         env_dest: frontend/.env
         resources: "{{ frontend.resources }}"
 

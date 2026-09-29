@@ -19,8 +19,5 @@ rsync -az --delete \
     --exclude 'projects/*/docker-compose.yml' \
     --exclude 'infra/gateway/routes/' \
     --exclude 'projects/*/backend/*/.env' \
-    --exclude 'projects/*/backend/*/host.env' \
-    --exclude 'projects/*/.services.sh' \
     --exclude 'projects/*/frontend/.env' \
-    --exclude 'projects/*/proxy.conf' \
     "$FORMATION_DIR/" "$SERVER:$REMOTE_ROOT/formation-playbooks/"
