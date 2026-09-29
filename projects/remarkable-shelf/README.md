@@ -1,7 +1,11 @@
 # remarkable-shelf formation
 
 Deploys reMarkableShelf: one backend service (`server`) + a static frontend
-(Vite build served by nginx), sqlite for storage.
+(Vite build served by nginx), sqlite for storage. The server keeps book files
+(EPUBs and PDFs it copies to tablets) in
+[storage-service](../storage-service/README.md), which runs as its own
+formation and must be up for saving, downloading and copying them (API key:
+`storage_service_api_key` in this project's `secrets.yml`).
 
 See the [repo root README](../../README.md) for how the shared rendering
 pipeline works and how to run a project. This project's app repo is
@@ -16,6 +20,10 @@ database in the `remarkable-shelf-db` volume, and installed on each tablet
 when it's paired from the Sync page, which asks for the tablet's password
 once and doesn't store it. `secrets.yml`'s `remarkable_ssh_password` is no
 longer used. Book search uses Open Library, which needs no API key.
+
+`secrets.yml` holds `storage_service_api_key`, the raw key for the
+`remarkable-shelf` namespace, whose hash is in storage-service's
+`storage_clients_b64_json`.
 
 ## Server deployment
 

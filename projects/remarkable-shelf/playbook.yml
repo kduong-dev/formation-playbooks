@@ -15,6 +15,7 @@
     formation_root: "{{ playbook_dir }}/../.."
     # Backend Go module, relative to formation-playbooks' parent (the build context).
     backend_dir: reMarkableShelf/backend
+    external_networks: [storage]
 
   tasks:
     - name: Render service .env files

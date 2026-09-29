@@ -16,9 +16,10 @@ services:
   # must match the API's mux route prefix.
   server:
     resources:
-      secrets: [remarkable_ssh]
+      secrets: [remarkable_ssh, storage_service_api_key]
       config:  [server]
       stores:  [sqlite]
+      clients: [storage_service]
     scheme: http
     path_prefix: /api
     container: { host: server, port: 8080 }
@@ -26,6 +27,9 @@ services:
       memory: { limit: 256m, reservation: 64m }
       volumes:
         - "remarkable-shelf-db:/app/data"
+      # Keeps book files in storage-service, which runs as its own formation
+      # (projects/storage-service).
+      networks: [storage]
 
 frontend:
   # Catch-all: everything not matched by a service path_prefix lands on the frontend.

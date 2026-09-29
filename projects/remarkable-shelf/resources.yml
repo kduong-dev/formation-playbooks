@@ -9,3 +9,8 @@ named_volumes:
 stores:
   sqlite:
     DB_PATH: "{{ db.sqlite.path }}"
+
+# Runs as its own formation (projects/storage-service). Containers reach it over
+# the shared `storage` network.
+storage_service:
+  url: "http://storage-service:8083"
