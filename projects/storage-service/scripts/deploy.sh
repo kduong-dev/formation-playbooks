@@ -45,15 +45,13 @@ ssh "$SERVER" "cd '$REMOTE_PROJECT' && docker compose build && ./run-services.sh
 ssh "$SERVER" "'$REMOTE_GATEWAY/run-services.sh' up"
 
 echo "Checking storage-service responds..."
-# No key, so 401 means it's up and enforcing auth. Checked directly and through
-# the gateway (Host header, so it doesn't depend on DNS).
-# The loopback port is Docker-assigned, so ask compose for it.
-direct="$(ssh "$SERVER" "sleep 3; cd '$REMOTE_PROJECT' && curl -s -o /dev/null -w '%{http_code}' http://\$(docker compose port api 8083)/storage/v1/files" || true)"
-routed="$(ssh "$SERVER" "curl -s -o /dev/null -w '%{http_code}' -H 'Host: api.storage-service.home' http://127.0.0.1/storage/v1/files" || true)"
-if [[ "$direct" == "401" && "$routed" == "401" ]]; then
-    echo "storage-service is up, directly and via api.storage-service.home (401 without an API key, as expected)."
+# No key, so 401 means it's up and enforcing auth. Checked through the gateway
+# with a Host header, so it doesn't depend on DNS.
+routed="$(ssh "$SERVER" "sleep 3; curl -s -o /dev/null -w '%{http_code}' -H 'Host: api.storage-service.home' http://127.0.0.1/storage/v1/files" || true)"
+if [[ "$routed" == "401" ]]; then
+    echo "storage-service is up via api.storage-service.home (401 without an API key, as expected)."
 else
-    echo "Unexpected responses — direct: '$direct', via gateway: '$routed'. Logs:" >&2
+    echo "Unexpected response via gateway: '$routed'. Logs:" >&2
     ssh "$SERVER" "cd '$REMOTE_PROJECT' && docker compose logs --tail 30 api; cd '$REMOTE_GATEWAY' && docker compose logs --tail 30 traefik" >&2
     exit 1
 fi

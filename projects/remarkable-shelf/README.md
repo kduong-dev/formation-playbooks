@@ -27,5 +27,8 @@ longer used. Book search uses Open Library, which needs no API key.
 
 ## Server deployment
 
-Not yet set up: there's no `scripts/deploy.sh`. Copy the pattern from
-trading-core's or storage-service's.
+`scripts/deploy.sh` renders, syncs the formation and the reMarkableShelf
+repo to the server, builds and starts the stack there, and checks that
+`remarkable-shelf.home` and `/api/books` answer 200. Deploy storage-service
+first whenever its `storage_clients_b64_json` changes, so it accepts this
+project's key.
