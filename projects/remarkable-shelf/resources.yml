@@ -14,3 +14,9 @@ stores:
 # the shared `storage` network.
 storage_service:
   url: "http://storage-service:8083"
+
+# The host folder folder-source serves, mounted read-only. Drop EPUBs and
+# PDFs in it, named after their books; subfolders are searched too.
+books_folder:
+  host_path: /opt/remarkable-shelf/books
+  name: Bookshelf folder

@@ -9,12 +9,13 @@
 # Services are routed on api_domain / local_api_domain, which default to the
 # frontend's domain / local_domain for a frontend that calls its API by
 # relative path (/api/...). Their routes beat the frontend's catch-all
-# (priority 1).
+# (priority 1). A service without a path_prefix is internal: only its own
+# stack reaches it, so it isn't routed.
 
 http:
   routers:
 {% set route_hosts = [('', api_domain | default(domain)), ('-local', local_api_domain | default(local_domain))] %}
-{% for key, cfg in services.items() %}
+{% for key, cfg in services.items() if cfg.path_prefix is defined %}
 {% set name = project ~ '-' ~ (key | replace('_', '-')) %}
 {% for suffix, host in route_hosts %}
     {{ name }}{{ suffix }}:
@@ -37,7 +38,7 @@ http:
 {% endif %}
 
   services:
-{% for key, cfg in services.items() %}
+{% for key, cfg in services.items() if cfg.path_prefix is defined %}
 {% set name = project ~ '-' ~ (key | replace('_', '-')) %}
     {{ name }}:
       loadBalancer:

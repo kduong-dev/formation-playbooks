@@ -31,6 +31,20 @@ services:
       # (projects/storage-service).
       networks: [storage]
 
+  # The example ebook source plugin (cmd/folder-source), serving the EPUBs
+  # and PDFs in the host's books folder. It's internal, with no path_prefix:
+  # only the server reaches it, as http://folder-source:8090, the URL to add
+  # it under on the app's Sources page.
+  folder_source:
+    resources:
+      config: [folder_source]
+    scheme: http
+    container: { host: folder-source, port: 8090 }
+    compose:
+      memory: { limit: 64m, reservation: 16m }
+      volumes:
+        - "{{ books_folder.host_path }}:/books:ro"
+
 frontend:
   # Catch-all: everything not matched by a service path_prefix lands on the frontend.
   compose:

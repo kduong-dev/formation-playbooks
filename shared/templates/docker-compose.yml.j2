@@ -2,18 +2,21 @@
 # Source: {{ project }}/services.yml, {{ project }}/resources.yml, shared/templates/docker-compose.yml.j2
 
 {#
-  Routable containers (services + frontend) join the shared `gateway` network,
-  where infra/gateway's Traefik reaches them as <project>-<name>; the alias
-  keeps same-named containers from different projects (e.g. two `frontend`s)
-  apart. On any other shared network a service is aliased as its
+  Routable containers (the frontend, and services with a path_prefix) join
+  the shared `gateway` network, where infra/gateway's Traefik reaches them as
+  <project>-<name>; the alias keeps same-named containers from different
+  projects (e.g. two `frontend`s) apart. A service without a path_prefix is
+  internal and stays off it. On any other shared network a service is aliased as its
   container.host, the name its callers use. Everything else stays on the
   project's own default network.
 #}
-{% macro networks(name, extra=[], host=none) %}
+{% macro networks(name, extra=[], host=none, routed=true) %}
     networks:
       default: {}
+{% if routed %}
       gateway:
         aliases: [{{ project }}-{{ name }}]
+{% endif %}
 {% for net in extra %}
       {{ net }}:
         aliases: [{{ host }}]
@@ -103,7 +106,7 @@ services:
       - '{{ port }}'
 {% endfor %}
 {% endif %}
-{{ networks(name, cfg.compose.networks | default([]), cfg.container.host) -}}
+{{ networks(name, cfg.compose.networks | default([]), cfg.container.host, cfg.path_prefix is defined) -}}
 {% if cfg.compose.depends_on is defined %}
     depends_on:
 {% for dep in cfg.compose.depends_on %}

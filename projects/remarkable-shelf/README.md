@@ -1,7 +1,8 @@
 # remarkable-shelf formation
 
-Deploys reMarkableShelf: one backend service (`server`) + a static frontend
-(Vite build served by nginx), sqlite for storage. The server keeps book files
+Deploys reMarkableShelf: the backend `server`, the internal `folder-source`
+ebook source plugin, and a static frontend (Vite build served by nginx),
+sqlite for storage. The server keeps book files
 (EPUBs and PDFs it copies to tablets) in
 [storage-service](../storage-service/README.md), which runs as its own
 formation and must be up for saving, downloading and copying them (API key:
@@ -24,6 +25,15 @@ longer used. Book search uses Open Library, which needs no API key.
 `secrets.yml` holds `storage_service_api_key`, the raw key for the
 `remarkable-shelf` namespace, whose hash is in storage-service's
 `storage_clients_b64_json`.
+
+## Books folder
+
+`folder-source` serves the EPUBs and PDFs in `/opt/remarkable-shelf/books`
+on the host (`books_folder` in `resources.yml`), read-only. A book in the
+library can fetch a file whose name holds every word of its title, such as
+`Robert C. Martin - Clean Code.epub` for Clean Code. To use it, create the
+folder, then add `http://folder-source:8090` as a Plugin on the app's
+Sources page, and order it among the other sources there.
 
 ## Server deployment
 

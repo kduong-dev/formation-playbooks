@@ -11,6 +11,10 @@ secrets:
 config:
   server:
     PORT: "{{ services.server.container.port }}"
+  folder_source:
+    PORT: "{{ services.folder_source.container.port }}"
+    FOLDER_SOURCE_DIR: /books
+    FOLDER_SOURCE_NAME: "{{ books_folder.name }}"
 
 # The server keeps book files in storage-service, reached over the shared
 # `storage` docker network.
